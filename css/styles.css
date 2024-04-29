@@ -1,19 +1,48 @@
-body {
-    font-family: Arial, sans-serif;
+/* Add Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400&display=swap');
+
+/* Basic Reset */
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-header, footer {
-    text-align: center;
-    background-color: #8cd899;
-    padding: 20px 0;
+body {
+    font-family: 'Open Sans', sans-serif;
+    color: #000;
+    background-color: #fff;
 }
 
+/* Color Scheme: Mint Green and White */
+header, footer {
+    background-color: #98ff98; /* Mint Green */
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+main {
+    padding: 20px;
+    background-color: #fff; /* White */
+    color: #000;
+}
+
+a {
+    color: #98ff98;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Navigation Styles */
 nav ul {
     list-style: none;
-    padding: 0;
+    background-color: #98ff98;
+    text-align: center;
+    padding: 20px;
 }
 
 nav ul li {
@@ -22,14 +51,27 @@ nav ul li {
 }
 
 nav ul li a {
-    text-decoration: none;
-    color: #333;
+    font-weight: 400;
+    color: #ffffff;
 }
 
-main {
-    padding: 20px;
-}
-
+/* Section Styling */
 section {
-    margin-bottom: 20px;
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f0fff0; /* Lighter mint shade for contrast */
+}
+
+/* Button Styling */
+button {
+    background-color: #98ff98;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #8eed8e; /* Slightly darker mint */
 }
