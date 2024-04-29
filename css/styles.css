@@ -18,6 +18,7 @@ body {
 header, footer {
     background-color: #98ff98; /* Mint Green */
     color: #fff;
+    filter: saturate(.4);
     padding: 20px;
     text-align: center;
 }
@@ -41,6 +42,7 @@ a:hover {
 nav ul {
     list-style: none;
     background-color: #98ff98;
+    filter: saturate(.4);
     text-align: center;
     padding: 20px;
 }
