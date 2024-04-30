@@ -28,7 +28,7 @@ main {
     padding: 20px;
     background-color: #fff; /* White */
     color: #000;
-    transition: opacity 2s ease-in-out; /* Smooth transition for opacity */
+    transition: opacity 2s ease-in; /* Smooth transition for opacity */
 }
 
 a {
