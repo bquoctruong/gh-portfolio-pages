@@ -12,6 +12,8 @@ body {
     font-family: 'Open Sans', sans-serif;
     color: #000;
     background-color: #fff;
+    opacity: 0; /* Initial opacity */
+    transition: opacity 2s ease-in-out; /* Smooth transition for opacity */
 }
 
 /* Color Scheme: Mint Green and White */
