@@ -76,6 +76,12 @@ jobs:
           workload_identity_provider: '${{ vars.WORKLOAD_IDENTITY_PROVIDER }}'
           service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
           token_format: 'access_token'
+      # Example of using the output. The token is usually provided as a Bearer
+      # token.
+      - id: 'access-secret'
+        run: |-
+          curl https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret/versions/1:access \
+            --header "Authorization: Bearer ${{ steps.auth.outputs.access_token }}"
 
       # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
 
