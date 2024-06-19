@@ -81,6 +81,7 @@ jobs:
         with:
           project_id: '${{ vars.PROJECT_ID }}'
           workload_identity_provider: '${{ vars.WORKLOAD_IDENTITY_PROVIDER }}'
+          token_format: 'access_token'
 
       # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
 
