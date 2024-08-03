@@ -90,19 +90,22 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           version: 'latest'
-          
+
       - name: Authenticate Docker with GCR
-        run: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
+        run: |
+          gcloud auth configure-docker --quiet
+          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
+
       
 
       # Authenticate Docker to Google Cloud Artifact Registry
-      - name: Docker Auth
-        id: docker-auth
-        uses: 'docker/login-action@v3'
-        with:
-          username: 'oauth2accesstoken'
-          password: '${{ steps.auth.outputs.access_token }}'
-          registry: '${{ vars.GAR_LOCATION }}-docker.pkg.dev'
+      # - name: Docker Auth
+      #   id: docker-auth
+      #   uses: 'docker/login-action@v3'
+      #   with:
+      #     username: 'oauth2accesstoken'
+      #     password: '${{ steps.auth.outputs.access_token }}'
+      #     registry: '${{ vars.GAR_LOCATION }}-docker.pkg.dev'
 
       - name: Build and Push Container
         run: |-
