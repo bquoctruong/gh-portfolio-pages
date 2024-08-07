@@ -52,6 +52,8 @@ jobs:
       - name: Load Docker image from tar file
         id: load
         run: |
+          ls -lah $GITHUB_WORKSPACE
+          pwd $GITHUB_WORKSPACE
           docker load -i $GITHUB_WORKSPACE/${{ vars.SERVICE }}_${{ github.sha }}
         #    docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
   deploy:
