@@ -7,8 +7,6 @@ on:
     workflows: [Build Docker Image]
     types:
       - completed
-  workflow_dispatch:
-
 jobs:
   load:
     runs-on: ubuntu-latest
