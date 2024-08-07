@@ -1,0 +1,32 @@
+name: Build Docker Image
+
+on:
+    workflow_run:
+      workflows: [CodeQL]
+      types:
+        - completed
+
+jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ vars.SERVICE }}:${{ github.sha }}
+
+      - name: Save Docker image to tar file
+        run: |
+          docker save ${{ vars.SERVICE }}:${{ github.sha }} -o ${{ vars.SERVICE }}:${{ github.sha }}.tar
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ vars.SERVICE }}:${{ github.sha }}
+          path: ${{ vars.SERVICE }}:${{ github.sha }}.tar
+        # - name: Build and Push Container
+        #   run: |-
+        #     docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
+        #     docker push ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }}
