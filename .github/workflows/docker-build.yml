@@ -22,8 +22,8 @@ jobs:
       - name: Upload image artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ vars.SERVICE }}:${{ github.sha }}
-          path: ${{ vars.SERVICE }}:${{ github.sha }}.tar
+          name: ${{ vars.SERVICE }}_${{ github.sha }}
+          path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
         # - name: Build and Push Container
         #   run: |-
         #     docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
