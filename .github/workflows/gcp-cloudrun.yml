@@ -8,6 +8,7 @@ on:
       - completed
 jobs:
   build:
+        if: github.event.workflow_run.conclusion == 'success'
         runs-on: ubuntu-latest
         steps:
         - name: Checkout code
@@ -36,10 +37,11 @@ jobs:
           artifact_name: ${{ steps.set-output.outputs.artifact_name }}
           artifact_id: ${{ steps.artifact-upload-step.outputs.artifact-id }}
   load:
+    needs: 
+      [build]
     permissions:
       contents: 'read'
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Download image artifact
         uses: actions/download-artifact@v4
