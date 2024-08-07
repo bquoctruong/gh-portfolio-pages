@@ -47,12 +47,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ github.event.workflow_run.outputs.artifact_id }}
-          path: ./${{ vars.SERVICE }}_${{ github.sha }}.tar
+          path: $GITHUB_WORKSPACE/${{ vars.SERVICE }}_${{ github.sha }}.tar
     
       - name: Load Docker image from tar file
         id: load
         run: |
-          docker load -i ${{ vars.SERVICE }}_${{ github.sha }}.tar
+          docker load -i $GITHUB_WORKSPACE/${{ vars.SERVICE }}_${{ github.sha }}.tar
         #    docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
   deploy:
     # Add 'id-token' with the intended permissions for workload identity federation
