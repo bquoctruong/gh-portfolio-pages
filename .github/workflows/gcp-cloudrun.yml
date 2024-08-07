@@ -1,12 +1,12 @@
 name: Build and Deploy to Cloud Run
 
-# on:
-#   push:
-#      branches: [ "main" ]
-#   workflow_run:
-#     workflows: [CodeQL]
-#     types:
-#       - completed
+on:
+  push:
+     branches: [ "main" ]
+  workflow_run:
+    workflows: [Build Docker Image]
+    types:
+      - completed
 
 jobs:
   deploy:
