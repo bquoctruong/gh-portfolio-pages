@@ -15,7 +15,7 @@ jobs:
       - name: Download image artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ vars.SERVICE }}_${{ github.sha }}.tar
+          name: ${{ vars.SERVICE }}_${{ github.sha }}
     
       - name: Load Docker image from tar file
         id: load
