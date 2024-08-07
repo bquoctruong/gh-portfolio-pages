@@ -5,33 +5,27 @@ on:
     branches: [ "**" ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
+    build:
+      runs-on: ubuntu-latest
+      steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up variables
-        run: echo "SERVICE=my-service" >> $GITHUB_ENV
-
       - name: Build Docker image
         run: |
-          docker build -t ${{ env.SERVICE }}:${{ github.sha }} ./
+          docker build -t ${{ vars.SERVICE }}:${{ github.sha }} ./
 
       - name: Save Docker image to tar file
         run: |
-          docker save ${{ env.SERVICE }}:${{ github.sha }} -o ${{ env.SERVICE }}_${{ github.sha }}.tar
+          docker save ${{ vars.SERVICE }}:${{ github.sha }} -o ${{ vars.SERVICE }}_${{ github.sha }}.tar
 
       - name: Upload image artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.SERVICE }}_${{ github.sha }}
-          path: ${{ env.SERVICE }}_${{ github.sha }}.tar
+          name: ${{ vars.SERVICE }}_${{ github.sha }}
+          path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
           retention-days: 1
-
-      - name: Set output for artifact name
-        id: set-output
-        run: echo "::set-output name=artifact_name::${{ env.SERVICE }}_${{ github.sha }}"
-        
-    outputs:
-      artifact_name: ${{ steps.set-output.outputs.artifact_name }}
+        # - name: Build and Push Container
+        #   run: |-
+        #     docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
+        #     docker push ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }}

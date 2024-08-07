@@ -5,7 +5,6 @@ on:
     workflows: [Build Docker Image]
     types:
       - completed
-
 jobs:
   load:
     permissions:
@@ -17,17 +16,20 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ github.event.workflow_run.outputs.artifact_name }}
-
+    
       - name: Load Docker image from tar file
+        id: load
         run: |
-          docker load -i ${{ github.event.workflow_run.outputs.artifact_name }}.tar
-
+          docker load -i ${{ vars.SERVICE }}_${{ github.sha }}.tar
+        #    docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
   deploy:
+    # Add 'id-token' with the intended permissions for workload identity federation
     permissions:
       contents: 'read'
       id-token: 'write'
+
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,26 +39,28 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-      
       - id: 'access-secret'
-        run: |
+        run: |-
           curl https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret/versions/1:access \
             --header "Authorization: Bearer ${{ steps.auth.outputs.access_token }}"
+
+      # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
           version: 'latest'
-      
       - name: Authenticate Docker with GCR
         run: |
           gcloud auth configure-docker ${{ vars.GAR_LOCATION }}-docker.pkg.dev --quiet
           gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
 
       - name: Build and Push Container
-        run: |
-          docker image tag ${{ github.event.workflow_run.outputs.artifact_name }} ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }}
+        run: |-
+          docker image tag ${{ vars.SERVICE }}:${{ github.sha }} ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
           docker push ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }}
+
+      # END - Docker auth and build
 
       - name: Deploy to Cloud Run
         id: deploy
@@ -66,5 +70,6 @@ jobs:
           region: ${{ vars.REGION }}
           image: ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }}
 
+      # If required, use the Cloud Run url output in later steps
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
