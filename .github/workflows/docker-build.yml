@@ -20,7 +20,7 @@ jobs:
           docker save ${{ vars.SERVICE }}:${{ github.sha }} -o ${{ vars.SERVICE }}_${{ github.sha }}.tar
 
       - name: Upload image artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ vars.SERVICE }}_${{ github.sha }}
           path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
