@@ -10,6 +10,19 @@ on:
   workflow_dispatch:
 
 jobs:
+  load:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download image artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ vars.SERVICE }}_${{ github.sha }}
+    
+      - name: Load Docker image from tar file
+        id: load
+        run: |
+          docker load -i ${{ vars.SERVICE }}_${{ github.sha }}.tar
+        #    docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
   deploy:
     # Add 'id-token' with the intended permissions for workload identity federation
     permissions:
@@ -38,17 +51,6 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           version: 'latest'
-  
-      - name: Download image artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: ${{ vars.SERVICE }}_${{ github.sha }}
-    
-      - name: Load Docker image from tar file
-        run: |
-          docker load -i ${{ vars.SERVICE }}_${{ github.sha }}.tar
-        #    docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
-
       - name: Authenticate Docker with GCR
         run: |
           gcloud auth configure-docker ${{ vars.GAR_LOCATION }}-docker.pkg.dev --quiet
