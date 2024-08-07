@@ -24,6 +24,7 @@ jobs:
         with:
           name: ${{ vars.SERVICE }}_${{ github.sha }}
           path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
+          retention-days: 1
         # - name: Build and Push Container
         #   run: |-
         #     docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
