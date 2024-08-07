@@ -1,11 +1,40 @@
 name: Build and Deploy to Cloud Run
 
 on:
+
   workflow_run:
-    workflows: [Build Docker Image]
+    workflows: [CodeQL]
     types:
       - completed
 jobs:
+  build:
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Build Docker image
+          run: |
+            docker build -t ${{ vars.SERVICE }}:${{ github.sha }} ./
+
+        - name: Save Docker image to tar file
+          run: |
+            docker save ${{ vars.SERVICE }}:${{ github.sha }} -o ${{ vars.SERVICE }}_${{ github.sha }}.tar
+
+        - name: Upload image artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: ${{ vars.SERVICE }}_${{ github.sha }}
+            path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
+            retention-days: 1
+
+        - name: Set output for artifact name
+          id: set-output
+          run: echo "::set-output name=artifact_name::${{ env.SERVICE }}_${{ github.sha }}"
+            
+        outputs:
+          artifact_name: ${{ steps.set-output.outputs.artifact_name }}
+          artifact_id: ${{ steps.artifact-upload-step.outputs.artifact-id }}
   load:
     permissions:
       contents: 'read'
