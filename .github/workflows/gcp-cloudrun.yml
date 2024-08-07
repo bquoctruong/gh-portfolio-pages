@@ -15,7 +15,7 @@ jobs:
       - name: Download image artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ github.event.workflow_run.outputs.artifact_name }}
+          name: ${{ github.event.workflow_run.outputs.artifact_id }}
     
       - name: Load Docker image from tar file
         id: load

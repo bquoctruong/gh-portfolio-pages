@@ -25,6 +25,14 @@ jobs:
           name: ${{ vars.SERVICE }}_${{ github.sha }}
           path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
           retention-days: 1
+
+      - name: Set output for artifact name
+        id: set-output
+        run: echo "::set-output name=artifact_name::${{ env.SERVICE }}_${{ github.sha }}"
+          
+      outputs:
+        artifact_name: ${{ steps.set-output.outputs.artifact_name }}
+        artifact_id: ${{ steps.artifact-upload-step.outputs.artifact-id }}
         # - name: Build and Push Container
         #   run: |-
         #     docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
