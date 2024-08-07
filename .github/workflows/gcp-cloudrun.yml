@@ -10,6 +10,7 @@ on:
 jobs:
   load:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Download image artifact
         uses: actions/download-artifact@v4
