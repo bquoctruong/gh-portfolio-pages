@@ -13,7 +13,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ vars.SERVICE }}:${{ github.sha }}
+          docker build -t ${{ vars.SERVICE }}:${{ github.sha }} ./
 
       - name: Save Docker image to tar file
         run: |
