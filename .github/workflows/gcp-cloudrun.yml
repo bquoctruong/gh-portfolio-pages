@@ -29,13 +29,6 @@ jobs:
             path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
             retention-days: 1
 
-        - name: Set output for artifact name
-          id: set-output
-          run: echo "::set-output name=artifact_name::${{ env.SERVICE }}_${{ github.sha }}"
-            
-        outputs:
-          artifact_name: ${{ steps.set-output.outputs.artifact_name }}
-          artifact_id: ${{ steps.artifact-upload-step.outputs.artifact-id }}
   deploy:
     # Add 'id-token' with the intended permissions for workload identity federation
     needs: 
@@ -72,14 +65,7 @@ jobs:
           gcloud auth configure-docker ${{ vars.GAR_LOCATION }}-docker.pkg.dev --quiet
           gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
 
-      # - name: Load Docker image from tar file
-      #   id: load
-      #   run: |
-      #     docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
-      # - name: Checkout
-      #   uses: actions/checkout@v4
-
-      - name: Build and Push Container
+      - name: Load, Build and Push Container
         run: |-
           docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
           docker image tag ${{ vars.SERVICE }}:${{ github.sha }} ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }}
