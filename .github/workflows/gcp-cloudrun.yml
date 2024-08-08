@@ -36,24 +36,6 @@ jobs:
         outputs:
           artifact_name: ${{ steps.set-output.outputs.artifact_name }}
           artifact_id: ${{ steps.artifact-upload-step.outputs.artifact-id }}
-  # load:
-  #   needs: 
-  #     [build]
-  #   permissions:
-  #     contents: 'read'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download image artifact
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: ${{ vars.SERVICE }}_${{ github.sha }}
-  #         path: /tmp
-    
-  #     - name: Load Docker image from tar file
-  #       id: load
-  #       run: |
-  #         docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
-  #       #    docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
   deploy:
     # Add 'id-token' with the intended permissions for workload identity federation
     needs: 
@@ -103,7 +85,6 @@ jobs:
 
       - name: Build and Push Container
         run: |-
-          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
           docker image tag ${{ vars.SERVICE }}:${{ github.sha }} ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }}
           docker push ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }}
 
