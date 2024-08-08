@@ -100,6 +100,14 @@ jobs:
       - name: Docker image LS
         run: |-
           docker image ls
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+            version: 'latest'
+      - name: Authenticate Docker with GCR
+        run: |
+            gcloud auth configure-docker ${{ vars.GAR_LOCATION }}-docker.pkg.dev --quiet
+            gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
 
       - name: Build and Push Container
         run: |-
