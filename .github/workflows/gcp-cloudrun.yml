@@ -1,66 +1,88 @@
 name: Build and Deploy to Cloud Run
 
 on:
+
   workflow_run:
     workflows: [CodeQL]
     types:
       - completed
-
 jobs:
   build:
-    if: github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        if: github.event.workflow_run.conclusion == 'success'
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker build -t ${{ vars.SERVICE }}:${{ github.sha }} .
+        - name: Build Docker image
+          run: |
+            docker build -t ${{ vars.SERVICE }}:${{ github.sha }} ./
 
-      - name: Save Docker image to tar file
-        run: docker save ${{ vars.SERVICE }}:${{ github.sha }} -o ${{ vars.SERVICE }}_${{ github.sha }}.tar
+        - name: Save Docker image to tar file
+          run: |
+            docker save ${{ vars.SERVICE }}:${{ github.sha }} -o ${{ vars.SERVICE }}_${{ github.sha }}.tar
 
-      - name: Upload image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ vars.SERVICE }}_${{ github.sha }}
-          path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
-          retention-days: 1
+        - name: Upload image artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: ${{ vars.SERVICE }}_${{ github.sha }}
+            path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
+            retention-days: 1
 
-      - name: Set output for artifact name
-        id: set-output
-        run: echo "::set-output name=artifact_name::${{ vars.SERVICE }}_${{ github.sha }}"
-        
-    outputs:
-      artifact_name: ${{ steps.set-output.outputs.artifact_name }}
-      artifact_id: ${{ steps.artifact-upload-step.outputs.artifact-id }}
-
+        - name: Set output for artifact name
+          id: set-output
+          run: echo "::set-output name=artifact_name::${{ env.SERVICE }}_${{ github.sha }}"
+            
+        outputs:
+          artifact_name: ${{ steps.set-output.outputs.artifact_name }}
+          artifact_id: ${{ steps.artifact-upload-step.outputs.artifact-id }}
+  # load:
+  #   needs: 
+  #     [build]
+  #   permissions:
+  #     contents: 'read'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Download image artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: ${{ vars.SERVICE }}_${{ github.sha }}
+  #         path: /tmp
+    
+  #     - name: Load Docker image from tar file
+  #       id: load
+  #       run: |
+  #         docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
+  #       #    docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
   deploy:
-    needs: build
+    # Add 'id-token' with the intended permissions for workload identity federation
+    needs: 
+      [build]
     permissions:
       contents: 'read'
       id-token: 'write'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Google Auth
-        uses: google-github-actions/auth@v2
+        id: auth
+        uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - id: 'access-secret'
+        run: |-
+          curl https://secretmanager.googleapis.com/v1/projects/my-project/secrets/my-secret/versions/1:access \
+            --header "Authorization: Bearer ${{ steps.auth.outputs.access_token }}"
+
+      # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
           version: 'latest'
-
       - name: Authenticate Docker with GCR
         run: |
-          echo ${{ secrets.GCP_SA_KEY }} > /tmp/gha-creds.json
-          gcloud auth activate-service-account --key-file=/tmp/gha-creds.json
-          gcloud auth configure-docker us-west2-docker.pkg.dev --quiet
-          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us-west2-docker.pkg.dev
+          gcloud auth configure-docker ${{ vars.GAR_LOCATION }}-docker.pkg.dev --quiet
+          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
 
       - name: Download image artifact
         uses: actions/download-artifact@v4
@@ -69,19 +91,32 @@ jobs:
           path: /tmp
 
       - name: Load Docker image from tar file
-        run: docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
+        id: load
+        run: |
+          docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker image LS
+        run: |-
+          docker image ls
 
       - name: Build and Push Container
-        run: |
-          docker image tag ${{ vars.SERVICE }}:${{ github.sha }} us-west2-docker.pkg.dev/web-temp-0/gcp-portfolio-0/${{ vars.SERVICE }}:${{ github.sha }}
-          docker push us-west2-docker.pkg.dev/web-temp-0/gcp-portfolio-0/${{ vars.SERVICE }}:${{ github.sha }}
+        run: |-
+          gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
+          docker image tag ${{ vars.SERVICE }}:${{ github.sha }} ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }}
+          docker push ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }}
+
+      # END - Docker auth and build
 
       - name: Deploy to Cloud Run
+        id: deploy
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: ${{ vars.SERVICE }}
           region: ${{ vars.REGION }}
-          image: us-west2-docker.pkg.dev/web-temp-0/gcp-portfolio-0/${{ vars.SERVICE }}:${{ github.sha }}
+          image: ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }}
 
+      # If required, use the Cloud Run url output in later steps
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
