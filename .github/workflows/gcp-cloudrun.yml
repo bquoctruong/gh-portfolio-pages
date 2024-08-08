@@ -63,19 +63,6 @@ jobs:
       id-token: 'write'
     runs-on: ubuntu-latest
     steps:
-      - name: Download image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ vars.SERVICE }}_${{ github.sha }}
-          path: /tmp
-    
-      - name: Load Docker image from tar file
-        id: load
-        run: |
-          docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Google Auth
         id: auth
         uses: 'google-github-actions/auth@v2'
@@ -96,6 +83,19 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ vars.GAR_LOCATION }}-docker.pkg.dev --quiet
           gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
+
+      - name: Download image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ vars.SERVICE }}_${{ github.sha }}
+          path: /tmp
+
+      - name: Load Docker image from tar file
+        id: load
+        run: |
+          docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Build and Push Container
         run: |-
