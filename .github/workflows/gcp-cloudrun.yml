@@ -97,6 +97,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Docker image LS
+        run: |-
+          docker image ls
+
       - name: Build and Push Container
         run: |-
           docker image tag ${{ vars.SERVICE }}:${{ github.sha }} ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
