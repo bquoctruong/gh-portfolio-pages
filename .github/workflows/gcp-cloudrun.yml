@@ -36,11 +36,31 @@ jobs:
         outputs:
           artifact_name: ${{ steps.set-output.outputs.artifact_name }}
           artifact_id: ${{ steps.artifact-upload-step.outputs.artifact-id }}
-  load:
+  # load:
+  #   needs: 
+  #     [build]
+  #   permissions:
+  #     contents: 'read'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Download image artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: ${{ vars.SERVICE }}_${{ github.sha }}
+  #         path: /tmp
+    
+  #     - name: Load Docker image from tar file
+  #       id: load
+  #       run: |
+  #         docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
+  #       #    docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
+  deploy:
+    # Add 'id-token' with the intended permissions for workload identity federation
     needs: 
       [build]
     permissions:
       contents: 'read'
+      id-token: 'write'
     runs-on: ubuntu-latest
     steps:
       - name: Download image artifact
@@ -53,16 +73,6 @@ jobs:
         id: load
         run: |
           docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
-        #    docker build -t ${{ vars.GAR_LOCATION }}-docker.pkg.dev/${{ vars.PROJECT_ID }}/${{ vars.SERVICE }}-0/${{ vars.SERVICE }}:${{ github.sha }} ./
-  deploy:
-    # Add 'id-token' with the intended permissions for workload identity federation
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion == 'success'
-    steps:
       - name: Checkout
         uses: actions/checkout@v4
 
