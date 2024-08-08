@@ -1,4 +1,4 @@
-name: Build and Deploy to Cloud Run
+name: Build, Deploy to GCP Cloud Run / Lambda
 
 on:
 
