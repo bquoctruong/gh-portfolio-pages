@@ -67,7 +67,7 @@ jobs:
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           IMAGE_NAME=aws-portfolio
           ECR_URI=${{ vars.ECR_URI }}/$IMAGE_NAME
-          docker tag ${{ vars.SERVICE }}_${{ github.sha }} $ECR_URI:latest
+          docker tag ${{ vars.SERVICE }}:${{ github.sha }} $ECR_URI:latest
           docker push $ECR_URI:latest
 
 
