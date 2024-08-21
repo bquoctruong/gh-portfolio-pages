@@ -1,0 +1,19 @@
+{
+    "name": "aws-lambda-nodejs-portfolio",
+    "version": "0.0.1",
+    "description": "NodeJS app to package into an AWS Lambda",
+    "author": "Brian T.",
+    "license": "MIT",
+    "main": "server.js",
+    "keywords": [
+      "nodejs",
+      "bootstrap",
+      "express",
+      "fs",
+      "path",
+      "serverless-http"
+    ],
+    "dependencies": {
+      "express": "^4.16.4"
+    }
+  }
