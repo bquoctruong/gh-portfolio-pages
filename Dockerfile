@@ -12,8 +12,6 @@ WORKDIR /srv
 
 RUN adduser -D -H caddy
 
-RUN addgroup caddy
-
 RUN chown -R caddy:caddy /srv
 
 # Expose port 80 and 443 for HTTP and HTTPS
