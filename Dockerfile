@@ -10,7 +10,7 @@ COPY . /srv
 # Set the working directory for Caddy
 WORKDIR /srv
 
-RUN adduser caddy
+RUN adduser -D -H caddy
 
 RUN addgroup caddy
 
