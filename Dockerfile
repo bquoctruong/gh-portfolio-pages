@@ -1,6 +1,9 @@
 # Use the official Caddy image from Docker Hub
 FROM caddy:alpine
 
+# Copy the Caddyfile to the Caddy configuration directory
+COPY Caddyfile /etc/caddy/Caddyfile
+
 # Copy the HTML files and directories containing assets, CSS, images, and JS into the container
 COPY . /srv
 

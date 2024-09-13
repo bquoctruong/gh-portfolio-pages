@@ -1,0 +1,8 @@
+:80
+
+root * /srv
+
+# Remove .html extensions from URLs
+try_files {path} {path}/ {path}.html
+
+file_server
