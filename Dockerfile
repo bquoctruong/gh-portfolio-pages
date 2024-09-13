@@ -10,8 +10,7 @@ COPY . /srv
 # Set the working directory for Caddy
 WORKDIR /srv
 
-RUN groupadd caddy && useradd caddy
-
+RUN addgroup caddy && adduser caddy caddy
 RUN chown -R caddy:caddy /srv
 
 # Expose port 80 and 443 for HTTP and HTTPS
