@@ -10,6 +10,8 @@ COPY . /srv
 # Set the working directory for Caddy
 WORKDIR /srv
 
+RUN chown -R caddy:caddy /srv
+
 # Expose port 80 and 443 for HTTP and HTTPS
 EXPOSE 80 443
 
