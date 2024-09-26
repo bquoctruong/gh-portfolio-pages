@@ -1,21 +1,27 @@
-# Use the official Caddy image from Docker Hub
-FROM caddy:alpine
+# Use an official Node.js runtime as a parent image
+#FROM public.ecr.aws/lambda/nodejs:20-x
+FROM public.ecr.aws/lambda/nodejs:20-x86_64
+#FROM node:20-alpine
 
-# Copy the Caddyfile to the Caddy configuration directory
-COPY Caddyfile /etc/caddy/Caddyfile
+RUN mkdir -p ${LAMBDA_TASK_ROOT}/node_modules
 
-# Copy the HTML files and directories containing assets, CSS, images, and JS into the container
-COPY . /srv
+WORKDIR ${LAMBDA_TASK_ROOT}
 
-# Set the working directory for Caddy
-WORKDIR /srv
+COPY package.json ${LAMBDA_TASK_ROOT}
 
-RUN adduser -D -H caddy
+#USER node
 
-RUN chown -R caddy:caddy /srv
+#Install any needed dependencies
+RUN npm install
 
-# Expose port 80 and 443 for HTTP and HTTPS
-EXPOSE 80 443
+COPY server.js ${LAMBDA_TASK_ROOT}
 
-# Use the default Caddyfile (automatically handles static files)
-CMD ["caddy", "file-server", "--browse"]
+
+#Copy the previous directory contents into the container at /usr/src/app
+COPY . ${LAMBDA_TASK_ROOT}
+
+# Make port 80 available to the world outside this container
+EXPOSE 80 8080
+
+# Run app when the container launches
+CMD ["index.handler"]
