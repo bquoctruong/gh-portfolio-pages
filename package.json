@@ -1,0 +1,24 @@
+{
+  "name": "bqt-render-nodejs-portfolio",
+  "version": "1.0.0",
+  "description": "Portfolio app for BQT, built on NodeJS",
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www",
+    "test": "mocha"
+  },
+  "author": "Brian T.",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^6.5.4",
+    "pug": "^3.0.2",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20",
+    "mocha": "^10.1.0",
+    "chai": "^4.3.7"
+  }
+}
