@@ -1,5 +1,4 @@
-name: Build, Deploy to GCP Cloud Run / Lambda
-
+name: Build, Deploy to GCP Cloud Run
 on:
   push:
     branches: [main]
@@ -9,69 +8,26 @@ on:
       - completed
 jobs:
   build:
-        if: github.event.workflow_run.conclusion == 'success'
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+          if: github.event.workflow_run.conclusion == 'success'
+          runs-on: ubuntu-latest
+          steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
 
-        - name: Build Docker image
-          run: |
-            docker build -t ${{ vars.SERVICE }}:${{ github.sha }} ./
+          - name: Build Docker image
+            run: |
+              docker build -t ${{ vars.SERVICE }}:${{ github.sha }} ./
 
-        - name: Save Docker image to tar file
-          run: |
-            docker save ${{ vars.SERVICE }}:${{ github.sha }} -o ${{ vars.SERVICE }}_${{ github.sha }}.tar
+          - name: Save Docker image to tar file
+            run: |
+              docker save ${{ vars.SERVICE }}:${{ github.sha }} -o ${{ vars.SERVICE }}_${{ github.sha }}.tar
 
-        - name: Upload image artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: ${{ vars.SERVICE }}_${{ github.sha }}
-            path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
-            retention-days: 1
-  deploy-aws:
-    # Add 'id-token' with the intended permissions for workload identity federation
-    needs: 
-      [build]
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ vars.SERVICE }}_${{ github.sha }}
-          path: /tmp
-
-      - name: Load Container
-        run: |-
-          docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          # role-to-assume: ${{ secrets.AWS_SERVICE_ACCOUNT_IAM_ROLE }}
-          # role-session-name: bqt-gha-session
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Log in to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registry-type: public
-  
-      - name: Tag, Push Docker Image to ECR
-        run: |
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          IMAGE_NAME=aws-portfolio
-          ECR_URI=${{ vars.ECR_URI }}
-          docker tag ${{ vars.SERVICE }}:${{ github.sha }} $ECR_URI:latest
-          docker push $ECR_URI:latest
-
-
+          - name: Upload image artifact
+            uses: actions/upload-artifact@v4
+            with:
+              name: ${{ vars.SERVICE }}_${{ github.sha }}
+              path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
+              retention-days: 1
   deploy-gcp:
     # Add 'id-token' with the intended permissions for workload identity federation
     needs: 
