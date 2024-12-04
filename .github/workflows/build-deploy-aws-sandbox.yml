@@ -8,26 +8,29 @@ on:
       - completed
 jobs:
   build:
-        if: github.event.workflow_run.conclusion == 'success'
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        - name: Build Docker image
-          run: |
-            docker build -t ${{ vars.SERVICE }}:${{ github.sha }} ./
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-        - name: Save Docker image to tar file
-          run: |
-            docker save ${{ vars.SERVICE }}:${{ github.sha }} -o ${{ vars.SERVICE }}_${{ github.sha }}.tar
+      - name: Install dependencies
+        run: npm install datadog-lambda-js dd-trace
 
-        - name: Upload image artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: ${{ vars.SERVICE }}_${{ github.sha }}
-            path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
-            retention-days: 1
+      - name: Package Lambda function
+        run: |
+          zip -r lambda_function.zip .
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda_function.zip
+          path: lambda_function.zip
   deploy-aws:
     # Add 'id-token' with the intended permissions for workload identity federation
     needs: 
@@ -37,36 +40,19 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - name: Download image artifact
+      - name: Download package artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ vars.SERVICE }}_${{ github.sha }}
+          name: lambda_function.zip
           path: /tmp
-
-      - name: Load Container
-        run: |-
-          docker load -i /tmp/${{ vars.SERVICE }}_${{ github.sha }}.tar
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          # role-to-assume: ${{ secrets.AWS_SERVICE_ACCOUNT_IAM_ROLE }}
-          # role-session-name: bqt-gha-session
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Log in to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registry-type: public
-  
-      - name: Tag, Push Docker Image to ECR
+          aws-region: us-west-1
+      - name: Deploy to AWS Lambda
         run: |
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          IMAGE_NAME=aws-portfolio
-          ECR_URI=${{ vars.ECR_URI }}
-          docker tag ${{ vars.SERVICE }}:${{ github.sha }} $ECR_URI:latest
-          docker push $ECR_URI:latest
-
+          aws lambda update-function-code --function-name ${{ vars.LAMBDA_FUNCTION_NAME }} \
+            --zip-file fileb:///tmp/lambda_function.zip
