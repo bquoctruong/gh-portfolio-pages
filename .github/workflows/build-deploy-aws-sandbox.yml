@@ -69,7 +69,7 @@ jobs:
       - name: Deploy to AWS Lambda
         run: |
           aws lambda update-function-code --function-name ${{ vars.LAMBDA_FUNCTION_NAME }} \
-            --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key lambda_function.zip--zip-file fileb:///tmp/lambda_function.zip
+            --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} --s3-key lambda_function.zip
   cleanup_s3:
     needs: 
       [deploy-aws]
