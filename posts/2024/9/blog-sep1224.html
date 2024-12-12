@@ -1,67 +1,78 @@
 ﻿<!DOCTYPE HTML>
 <html>
-	<head>
-		<title>GitHub Actions Deploy - Brian Truong</title>
-		<link rel="icon" type="image/x-icon" href="../../../assets/images/favicon.ico">
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="../../../assets/css/main.css" />
-	</head>
-	<body class="is-preload">
 
-		<!-- Header -->
-			<section id="header">
-				<header>
-					<span class="image avatar"><img src="../../../assets/images/avatar0.jpg" alt="" /></span>
-					<h1 id="logo"><a href="#">Brian Truong</a></h1>
-					<p>Site Reliability Engineer<br />
-					DevOps Engineer, or whichever term the industry wants to move onto</p>
-				</header>
-				<nav id="nav">
-					<ul>
-						<li><a href="https://bqtruong.com/">Home</a></li>
-						<li><a href="blog-introduction.html"> Introduction to the Blog</a></li>
-						<li><a href="blog-sep1224.html"> GitHub Pages Deploy</a></li>
-						<li><a href="../12/blog-dec624.html"> End of the Year Retrospective</a></li>
-					</ul>
-				</nav>
-				<footer>
-					<ul class="icons">
-						<li><a href="https://github.com/bquoctruong/" target="_blank" rel="noopener noreferrer" class="icon brands fa-github"><span class="label"></span></a></li>
-						<li><a href="https://www.linkedin.com/in/brian-truong-956260204/" target="_blank" rel="noopener noreferrer" class="fab fa-linkedin-in"><span class="label"></span></a></li>
-					</ul>
-				</footer>
-			</section>
+<head>
+	<title>GitHub Actions Deploy - Brian Truong</title>
+	<link rel="icon" type="image/x-icon" href="../../../assets/images/favicon.ico">
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" href="../../../assets/css/main.css" />
+</head>
 
-		<!-- Wrapper -->
-			<div id="wrapper">
+<body class="is-preload">
 
-				<!-- Main -->
-					<div id="main">
+	<!-- Header -->
+	<section id="header">
+		<header>
+			<span class="image avatar"><img src="../../../assets/images/avatar0.jpg" alt="" /></span>
+			<h1 id="logo"><a href="#">Brian Truong</a></h1>
+			<p>Site Reliability Engineer<br />
+				DevOps Engineer, or whichever term the industry wants to move onto</p>
+		</header>
+		<nav id="nav">
+			<ul>
+				<li><a href="https://bqtruong.com/">Home</a></li>
+				<li><a href="blog-introduction.html"> Introduction to the Blog</a></li>
+				<li><a href="blog-sep1224.html"> GitHub Pages Deploy</a></li>
+				<li><a href="../12/blog-dec624.html"> End of the Year Retrospective</a></li>
+			</ul>
+		</nav>
+		<footer>
+			<ul class="icons">
+				<li><a href="https://github.com/bquoctruong/" target="_blank" rel="noopener noreferrer"
+						class="icon brands fa-github"><span class="label"></span></a></li>
+				<li><a href="https://www.linkedin.com/in/brian-truong-956260204/" target="_blank"
+						rel="noopener noreferrer" class="fab fa-linkedin-in"><span class="label"></span></a></li>
+			</ul>
+		</footer>
+	</section>
 
-						<!-- About -->
-							<section id="about">
-								<div class="image main" data-position="center">
-									<img src="../../../assets/images/banner1.jpg" alt="" />
-								</div>
-								<div class="container">
-									<header class="major">
-										<h2>GitHub Actions Deploy</h2>
-										<p>September 12, 2024</p>
-									</header>
-									<h3>Introduction</h3>
-									<p>     Today, I'd like to delve into the primary CICD pipeline I use to deploy to multiple environments: GitHub Actions.
-										As an independent developer, this will be one of the most common platforms to utilize when working on multiple projects due to
-										its high visibility, versatility, and acceptance.
-									</p>
-									<p>		My background was primarily Gitlab CICD-focused; while there are similarities between GitHub Actions and Gitlab CICD,
-										the differences are enough to where one simply cannot drag-and-drop a pre-existing YAML file and pray that it works. While
-										you can always manually deploy from your V.S. Code terminal and check on the deployment at the destination, this paradigm will
-										inevitably fail. One of the core tenants of CICD is the ability to always deploy tested code to a production environment without
-										fear of failure.
-									</p>
-									<h3>TL;DR - GCP</h3>
-									<p><pre><code>
+	<!-- Wrapper -->
+	<div id="wrapper">
+
+		<!-- Main -->
+		<div id="main">
+
+			<!-- About -->
+			<section id="about">
+				<div class="image main" data-position="center">
+					<img src="../../../assets/images/banner1.jpg" alt="" />
+				</div>
+				<div class="container">
+					<header class="major">
+						<h2>GitHub Actions Deploy</h2>
+						<p>September 12, 2024</p>
+					</header>
+					<h3>Introduction</h3>
+					<p> Today, I'd like to delve into the primary CICD pipeline I use to deploy to multiple
+						environments: GitHub Actions.
+						As an independent developer, this will be one of the most common platforms to utilize when
+						working on multiple projects due to
+						its high visibility, versatility, and acceptance.
+					</p>
+					<p> My background was primarily Gitlab CICD-focused; while there are similarities between GitHub
+						Actions and Gitlab CICD,
+						the differences are enough to where one simply cannot drag-and-drop a pre-existing YAML file and
+						pray that it works. While
+						you can always manually deploy from your V.S. Code terminal and check on the deployment at the
+						destination, this paradigm will
+						inevitably fail. One of the core tenants of CICD is the ability to always deploy tested code to
+						a production environment without
+						fear of failure.
+					</p>
+					<h3>TL;DR - GCP</h3>
+					<p>
+					<pre><code>
 name: Build, Deploy to GCP Cloud Run / Lambda
 
 on:
@@ -148,40 +159,45 @@ jobs:
 	- name: Show Output
 		run: echo ${{ steps.deploy.outputs.url }}
 											</code>		
-										</pre>							
-											</p>
-											<h3>Why</h3>
-<p>
-In my search for hosting a portfolio website as thrifty as possible, I settled on deploying to Google Cloud Platform (GCP), specifically utilizing Google's Cloud Run.
-Cloud Run has a generous free-tier that allows one to host serverless applications, which is perfect for a static website. Although you can host a static website for free via
-GitHub Pages, I decided to add the additional challenge of the following: custom domain (Presentation matters) and the beginning of a multi-cloud deployment strategy.
-</p>
-								</div>
-							</section>
-						<!-- Three -->
-					</div>
+										</pre>
+					</p>
+					<h3>Why</h3>
+					<p>
+						In my search for hosting a portfolio website as thrifty as possible, I settled on deploying to
+						Google Cloud Platform (GCP), specifically utilizing Google's Cloud Run.
+						Cloud Run has a generous free-tier that allows one to host serverless applications, which is
+						perfect for a static website. Although you can host a static website for free via
+						GitHub Pages, I decided to add the additional challenge of the following: custom domain
+						(Presentation matters) and the beginning of a multi-cloud deployment strategy.
+					</p>
+				</div>
+			</section>
+			<!-- Three -->
+		</div>
 
-				<!-- Footer -->
-					<section id="footer">
-						<div class="container">
-							<ul class="copyright">
-								<li>&copy; B.T. All rights reserved.</li><li><a href="http://html5up.net">Design</a></li>
-							</ul>
-						</div>
-					</section>
-
+		<!-- Footer -->
+		<section id="footer">
+			<div class="container">
+				<ul class="copyright">
+					<li>&copy; B.T. All rights reserved.</li>
+					<li><a href="http://html5up.net">Design</a></li>
+				</ul>
 			</div>
+		</section>
 
-		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.scrollex.min.js"></script>
-			<script src="assets/js/jquery.scrolly.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
+	</div>
 
-	</body>
+	<!-- Scripts -->
+	<script src="assets/js/jquery.min.js"></script>
+	<script src="assets/js/jquery.scrollex.min.js"></script>
+	<script src="assets/js/jquery.scrolly.min.js"></script>
+	<script src="assets/js/browser.min.js"></script>
+	<script src="assets/js/breakpoints.min.js"></script>
+	<script src="assets/js/util.js"></script>
+	<script src="assets/js/main.js"></script>
+
+</body>
+
 </html>
 
 <!--
