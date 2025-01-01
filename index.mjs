@@ -59,6 +59,21 @@ const getFileContent = (filePath) => {
  * Serves the HTML page, CSS, JS, images, and other assets.
  */
 export const handler = async (event) => {
+    const { rawPath, httpMethod } = event;
+    
+    // Handle time endpoint
+    if (httpMethod === 'GET' && rawPath === '/time') {
+        return {
+            statusCode: 200,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                utc_time: new Date().toISOString(),
+                timestamp: Date.now()
+            })
+        };
+    }
     let filePath = 'index.html';
     let contentType = 'text/html';
 
