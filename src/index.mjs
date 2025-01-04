@@ -41,31 +41,44 @@ const getFileContent = (filePath) => {
     }
 };
 
-// Lambda handler
+// Lambda handler function - must be named 'handler'
 export const handler = async (event) => {
-    console.log('Event:', JSON.stringify(event, null, 2));
-    const { rawPath } = event;
+    try {
+        console.log('Event:', JSON.stringify(event, null, 2));
+        
+        // API Gateway event structure
+        const path = event.path || event.rawPath || '/';
+        
+        // Handle time endpoint
+        if (path === '/time') {
+            return {
+                statusCode: 200,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                body: JSON.stringify({
+                    utc_time: new Date().toISOString(),
+                    timestamp: Date.now()
+                })
+            };
+        }
 
-    // Handle time endpoint
-    if (rawPath === '/time') {
-        return {
-            statusCode: 200,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            body: JSON.stringify({
-                utc_time: new Date().toISOString(),
-                timestamp: Date.now()
-            })
-        };
-    }
+        // Handle static files
+        const filePath = path === '/' ? 'index.html' : path.replace(/^\//, '');
+        const fileContent = getFileContent(filePath);
 
-    // Handle static files
-    const filePath = rawPath === '/' ? 'index.html' : rawPath.replace(/^\//, '');
-    const fileContent = getFileContent(filePath);
+        if (!fileContent) {
+            return {
+                statusCode: 404,
+                headers: {
+                    'Content-Type': 'text/plain',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                body: '404 Not Found'
+            };
+        }
 
-    if (fileContent) {
         return {
             statusCode: 200,
             headers: {
@@ -77,16 +90,17 @@ export const handler = async (event) => {
             body: fileContent.toString('base64'),
             isBase64Encoded: true
         };
+    } catch (error) {
+        console.error('Lambda error:', error);
+        return {
+            statusCode: 500,
+            headers: {
+                'Content-Type': 'text/plain',
+                'Access-Control-Allow-Origin': '*'
+            },
+            body: 'Internal Server Error'
+        };
     }
-
-    return {
-        statusCode: 404,
-        headers: {
-            'Content-Type': 'text/plain',
-            'Access-Control-Allow-Origin': '*'
-        },
-        body: '404 Not Found'
-    };
 };
 
 // Local server support
