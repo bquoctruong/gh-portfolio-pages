@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
-const ROOT = path.resolve(__dirname, 'public');
+const ROOT = __dirname; //path.resolve(__dirname, 'public');
 
 const getContentType = (filePath) => {
     const extname = path.extname(filePath).toLowerCase();
@@ -25,13 +25,19 @@ const getContentType = (filePath) => {
 
 const getFileContent = (filePath) => {
     try {
+        // Ensure the path is within ROOT directory
         const resolvedPath = path.resolve(ROOT, filePath);
         if (!resolvedPath.startsWith(ROOT)) {
-            throw new Error('Access denied');
+            console.error('Path traversal attempt:', filePath);
+            return null;
         }
-        return fs.readFileSync(resolvedPath);
+        
+        if (fs.existsSync(resolvedPath)) {
+            return fs.readFileSync(resolvedPath);
+        }
+        return null;
     } catch (err) {
-        console.error(`File not found or access denied: ${filePath}`);
+        console.error(`Error reading file: ${filePath}`, err);
         return null;
     }
 };
@@ -54,14 +60,15 @@ const handleRequest = async (req, res) => {
     }
 
     // Handle static files
-    let filePath = 'index.html';
-    let contentType = 'text/html';
-
-    if (rawPath && rawPath !== '/') {
-        filePath = path.join(ROOT, rawPath);
-        contentType = getContentType(filePath);
+    let filePath;
+    if (rawPath === '/') {
+        filePath = 'index.html';
+    } else {
+        // Remove leading slash and normalize path
+        filePath = rawPath.replace(/^\//, '');
     }
 
+    const contentType = getContentType(filePath);
     const fileContent = getFileContent(filePath);
 
     if (fileContent) {
@@ -83,6 +90,13 @@ const handleRequest = async (req, res) => {
 const PORT = process.env.PORT || 80;
 const server = http.createServer(handleRequest);
 
+// Ensure the public directory exists
+if (!fs.existsSync(ROOT)) {
+    console.log(`Creating public directory at ${ROOT}`);
+    fs.mkdirSync(ROOT, { recursive: true });
+}
+
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    console.log(`Serving files from ${ROOT}`);
 });
