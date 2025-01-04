@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
+const ROOT = path.resolve(__dirname, 'public');
 
 const getContentType = (filePath) => {
     const extname = path.extname(filePath).toLowerCase();
@@ -24,9 +25,13 @@ const getContentType = (filePath) => {
 
 const getFileContent = (filePath) => {
     try {
-        return fs.readFileSync(filePath);
+        const resolvedPath = path.resolve(ROOT, filePath);
+        if (!resolvedPath.startsWith(ROOT)) {
+            throw new Error('Access denied');
+        }
+        return fs.readFileSync(resolvedPath);
     } catch (err) {
-        console.error(`File not found: ${filePath}`);
+        console.error(`File not found or access denied: ${filePath}`);
         return null;
     }
 };
@@ -53,7 +58,7 @@ const handleRequest = async (req, res) => {
     let contentType = 'text/html';
 
     if (rawPath && rawPath !== '/') {
-        filePath = `.${rawPath}`;
+        filePath = path.join(ROOT, rawPath);
         contentType = getContentType(filePath);
     }
 
