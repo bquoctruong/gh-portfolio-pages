@@ -26,3 +26,7 @@ replay_pid*
 key.json
 
 gha-creds-*.json
+
+coverage/
+
+node_modules/

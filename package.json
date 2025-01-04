@@ -4,7 +4,8 @@
   "description": "Portfolio website",
   "main": "index.mjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch"  
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/bquoctruong/gh-portfolio-pages/issues"
   },
-  "homepage": "https://github.com/bquoctruong/gh-portfolio-pages#readme"
+  "homepage": "https://github.com/bquoctruong/gh-portfolio-pages#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
 }
