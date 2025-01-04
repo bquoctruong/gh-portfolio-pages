@@ -4,7 +4,16 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const PUBLIC_DIR = path.join(__dirname, '../public');
+
+// Lambda-specific path resolution
+const PUBLIC_DIR = process.env.LAMBDA_TASK_ROOT 
+    ? path.join(process.env.LAMBDA_TASK_ROOT, 'public')
+    : path.join(__dirname, '../public');
+
+// Debug logging
+console.log('PUBLIC_DIR:', PUBLIC_DIR);
+console.log('__dirname:', __dirname);
+console.log('LAMBDA_TASK_ROOT:', process.env.LAMBDA_TASK_ROOT);
 
 const getContentType = (filePath) => {
     const extname = path.extname(filePath).toLowerCase();
@@ -26,17 +35,27 @@ const getContentType = (filePath) => {
     }
 };
 
-// File content helper with Lambda support
+// File content helper with improved path handling
 const getFileContent = (filePath) => {
     try {
-        const resolvedPath = path.join(PUBLIC_DIR, filePath);
+        const sanitizedPath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+        const resolvedPath = path.join(PUBLIC_DIR, sanitizedPath);
+        
+        console.log('Attempting to read:', resolvedPath);
+        
         if (!resolvedPath.startsWith(PUBLIC_DIR)) {
             console.error('Path traversal attempt:', filePath);
             return null;
         }
+        
+        if (!fs.existsSync(resolvedPath)) {
+            console.error('File not found:', resolvedPath);
+            return null;
+        }
+        
         return fs.readFileSync(resolvedPath);
     } catch (err) {
-        console.error(`File not found: ${filePath}`);
+        console.error('File read error:', err);
         return null;
     }
 };
