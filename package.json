@@ -1,0 +1,19 @@
+{
+  "name": "gh-portfolio-pages",
+  "version": "1.0.0",
+  "description": "Portfolio website",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bquoctruong/gh-portfolio-pages.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bquoctruong/gh-portfolio-pages/issues"
+  },
+  "homepage": "https://github.com/bquoctruong/gh-portfolio-pages#readme"
+}

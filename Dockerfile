@@ -1,21 +1,21 @@
-# Use the official Caddy image from Docker Hub
-FROM caddy:alpine
+# Use the official Node.js 18 image as base
+FROM node:18-alpine
 
-# Copy the Caddyfile to the Caddy configuration directory
-COPY Caddyfile /etc/caddy/Caddyfile
+# Create app directory
+WORKDIR /usr/src/app
 
-# Copy the HTML files and directories containing assets, CSS, images, and JS into the container
-COPY . /srv
+# Copy package files
+COPY package*.json ./
 
-# Set the working directory for Caddy
-WORKDIR /srv
+# Install dependencies
+RUN npm install
 
-RUN adduser -D -H caddy
+# Bundle app source
+COPY . .
 
-RUN chown -R caddy:caddy /srv
+# Expose the port the app runs on
+ENV PORT=80
+EXPOSE 80
 
-# Expose port 80 and 443 for HTTP and HTTPS
-EXPOSE 80 443
-
-# Use the default Caddyfile (automatically handles static files)
-CMD ["caddy", "file-server", "--browse"]
+# Define the command to run your app
+CMD ["node", "index.js"]
