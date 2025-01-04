@@ -11,63 +11,43 @@ const PUBLIC_DIR = process.env.LAMBDA_TASK_ROOT
     : path.join(__dirname, '../public');
 
 // Debug logging
-console.log('PUBLIC_DIR:', PUBLIC_DIR);
-console.log('__dirname:', __dirname);
-console.log('LAMBDA_TASK_ROOT:', process.env.LAMBDA_TASK_ROOT);
+console.log('Environment:', {
+    LAMBDA_TASK_ROOT: process.env.LAMBDA_TASK_ROOT,
+    PUBLIC_DIR,
+    __dirname,
+    files: fs.readdirSync(process.env.LAMBDA_TASK_ROOT || PUBLIC_DIR)
+});
 
-const getContentType = (filePath) => {
-    const extname = path.extname(filePath).toLowerCase();
-    switch (extname) {
-        case '.html': return 'text/html';
-        case '.css': return 'text/css';
-        case '.js': return 'application/javascript';
-        case '.json': return 'application/json';
-        case '.png': return 'image/png';
-        case '.jpg':
-        case '.jpeg': return 'image/jpeg';
-        case '.gif': return 'image/gif';
-        case '.svg': return 'image/svg+xml';
-        case '.ico': return 'image/x-icon';
-        case '.woff': return 'font/woff';
-        case '.woff2': return 'font/woff2';
-        case '.ttf': return 'font/ttf';
-        default: return 'application/octet-stream';
-    }
-};
-
-// File content helper with improved path handling
 const getFileContent = (filePath) => {
     try {
         const sanitizedPath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
         const resolvedPath = path.join(PUBLIC_DIR, sanitizedPath);
         
-        console.log('Attempting to read:', resolvedPath);
+        console.log('File request:', {
+            requested: filePath,
+            resolved: resolvedPath,
+            exists: fs.existsSync(resolvedPath)
+        });
         
         if (!resolvedPath.startsWith(PUBLIC_DIR)) {
             console.error('Path traversal attempt:', filePath);
             return null;
         }
         
-        if (!fs.existsSync(resolvedPath)) {
-            console.error('File not found:', resolvedPath);
-            return null;
-        }
-        
-        return fs.readFileSync(resolvedPath);
+        return fs.existsSync(resolvedPath) ? fs.readFileSync(resolvedPath) : null;
     } catch (err) {
         console.error('File read error:', err);
         return null;
     }
 };
 
-// Lambda handler function - must be named 'handler'
 export const handler = async (event) => {
+    console.log('Event:', JSON.stringify(event));
+    
     try {
-        console.log('Event:', JSON.stringify(event, null, 2));
-        
-        // API Gateway event structure
         const path = event.path || event.rawPath || '/';
-        
+        console.log('Requested path:', path);
+
         // Handle time endpoint
         if (path === '/time') {
             return {
@@ -88,13 +68,14 @@ export const handler = async (event) => {
         const fileContent = getFileContent(filePath);
 
         if (!fileContent) {
+            console.log('File not found:', filePath);
             return {
                 statusCode: 404,
                 headers: {
                     'Content-Type': 'text/plain',
                     'Access-Control-Allow-Origin': '*'
                 },
-                body: '404 Not Found'
+                body: 'File not found'
             };
         }
 
@@ -114,35 +95,13 @@ export const handler = async (event) => {
         return {
             statusCode: 500,
             headers: {
-                'Content-Type': 'text/plain',
+                'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            body: 'Internal Server Error'
+            body: JSON.stringify({
+                error: 'Internal Server Error',
+                message: error.message
+            })
         };
     }
 };
-
-// Local server support
-if (process.env.NODE_ENV === 'development') {
-    import('http').then(({ createServer }) => {
-        const PORT = process.env.PORT || 80;
-        
-        const server = createServer(async (req, res) => {
-            const event = {
-                rawPath: req.url
-            };
-            
-            const result = await handler(event);
-            
-            res.writeHead(result.statusCode, result.headers);
-            const body = result.isBase64Encoded 
-                ? Buffer.from(result.body, 'base64')
-                : result.body;
-            res.end(body);
-        });
-
-        server.listen(PORT, () => {
-            console.log(`Development server running at http://localhost:${PORT}/`);
-        });
-    });
-}

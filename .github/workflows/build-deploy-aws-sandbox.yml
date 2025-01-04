@@ -24,9 +24,11 @@ jobs:
 
       - name: Package Lambda function
         run: |
-          cp src/index.mjs .
-          cp -r public/ .
-          zip -r lambda_function.zip .
+          mkdir -p dist
+          cp src/index.mjs dist/
+          cp -r public dist/
+          cd dist
+          zip -r ../lambda_function.zip .
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
