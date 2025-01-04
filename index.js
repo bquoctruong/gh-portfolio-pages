@@ -75,7 +75,7 @@ const handleRequest = async (req, res) => {
 };
 
 // Create and start the server
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 80;
 const server = http.createServer(handleRequest);
 
 server.listen(PORT, () => {
