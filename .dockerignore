@@ -3,3 +3,5 @@ key.json
 Caddyfile
 Dockerfile
 index.mjs
+coverage/
+node_modules/

@@ -1,8 +1,12 @@
-const fs = require('fs');
-const path = require('path');
 const http = require('http');
-const ROOT = __dirname; //path.resolve(__dirname, 'public');
+const path = require('path');
+const fs = require('fs');
 
+// Constants
+const PORT = process.env.PORT || 80;
+const PUBLIC_DIR = path.join(__dirname, '../public');
+
+// Content type helper
 const getContentType = (filePath) => {
     const extname = path.extname(filePath).toLowerCase();
     switch (extname) {
@@ -23,11 +27,11 @@ const getContentType = (filePath) => {
     }
 };
 
+// File content helper
 const getFileContent = (filePath) => {
     try {
-        // Ensure the path is within ROOT directory
-        const resolvedPath = path.resolve(ROOT, filePath);
-        if (!resolvedPath.startsWith(ROOT)) {
+        const resolvedPath = path.join(PUBLIC_DIR, filePath);
+        if (!resolvedPath.startsWith(PUBLIC_DIR)) {
             console.error('Path traversal attempt:', filePath);
             return null;
         }
@@ -42,16 +46,18 @@ const getFileContent = (filePath) => {
     }
 };
 
+// Request handler
 const handleRequest = async (req, res) => {
-    console.log('Request:', req.method, req.url);
-    const rawPath = req.url;
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+
+    // Security headers
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Access-Control-Allow-Origin', '*');
 
     // Handle time endpoint
-    if (rawPath === '/time') {
-        res.writeHead(200, {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        });
+    if (req.url === '/time') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             utc_time: new Date().toISOString(),
             timestamp: Date.now()
@@ -60,43 +66,41 @@ const handleRequest = async (req, res) => {
     }
 
     // Handle static files
-    let filePath;
-    if (rawPath === '/') {
-        filePath = 'index.html';
-    } else {
-        // Remove leading slash and normalize path
-        filePath = rawPath.replace(/^\//, '');
-    }
-
-    const contentType = getContentType(filePath);
+    let filePath = req.url === '/' ? 'index.html' : req.url.replace(/^\//, '');
     const fileContent = getFileContent(filePath);
 
     if (fileContent) {
-        res.writeHead(200, {
-            'Content-Type': contentType,
-            'Access-Control-Allow-Origin': '*'
-        });
+        res.writeHead(200, { 'Content-Type': getContentType(filePath) });
         res.end(fileContent);
     } else {
-        res.writeHead(404, {
-            'Content-Type': 'text/plain',
-            'Access-Control-Allow-Origin': '*'
-        });
-        res.end('Not Found');
+        res.writeHead(404);
+        res.end('404 Not Found');
     }
 };
 
-// Create and start the server
-const PORT = process.env.PORT || 80;
-const server = http.createServer(handleRequest);
+// Create server without starting it
+const createServer = () => {
+    return http.createServer(handleRequest);
+};
 
-// Ensure the public directory exists
-if (!fs.existsSync(ROOT)) {
-    console.log(`Creating public directory at ${ROOT}`);
-    fs.mkdirSync(ROOT, { recursive: true });
+// Start server function
+const startServer = (port = PORT) => {
+    const server = createServer();
+    server.listen(port, () => {
+        console.log(`Server running at http://localhost:${port}/`);
+    });
+    return server;
+};
+
+// Only start server if this file is run directly
+if (require.main === module) {
+    startServer();
 }
 
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Serving files from ${ROOT}`);
-});
+module.exports = {
+    handleRequest,
+    createServer,
+    startServer,
+    getContentType,
+    getFileContent
+};

@@ -3,8 +3,13 @@
   "version": "1.0.0",
   "description": "Portfolio website",
   "main": "index.mjs",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
   },
   "repository": {
     "type": "git",
@@ -15,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/bquoctruong/gh-portfolio-pages/issues"
   },
-  "homepage": "https://github.com/bquoctruong/gh-portfolio-pages#readme"
+  "homepage": "https://github.com/bquoctruong/gh-portfolio-pages#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
 }
