@@ -10,6 +10,27 @@ const PUBLIC_DIR = process.env.LAMBDA_TASK_ROOT
     ? path.join(process.env.LAMBDA_TASK_ROOT, 'public')
     : path.join(__dirname, '../public');
 
+// Content type helper
+const getContentType = (filePath) => {
+    const extname = path.extname(filePath).toLowerCase();
+    switch (extname) {
+        case '.html': return 'text/html';
+        case '.css': return 'text/css';
+        case '.js': return 'application/javascript';
+        case '.json': return 'application/json';
+        case '.png': return 'image/png';
+        case '.jpg':
+        case '.jpeg': return 'image/jpeg';
+        case '.gif': return 'image/gif';
+        case '.svg': return 'image/svg+xml';
+        case '.ico': return 'image/x-icon';
+        case '.woff': return 'font/woff';
+        case '.woff2': return 'font/woff2';
+        case '.ttf': return 'font/ttf';
+        default: return 'application/octet-stream';
+    }
+};
+
 // Debug logging
 console.log('Environment:', {
     LAMBDA_TASK_ROOT: process.env.LAMBDA_TASK_ROOT,
@@ -105,3 +126,5 @@ export const handler = async (event) => {
         };
     }
 };
+
+export { getContentType };
