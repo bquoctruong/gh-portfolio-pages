@@ -41,7 +41,7 @@ const getFileContent = (filePath) => {
         }
         return null;
     } catch (err) {
-        console.error(`Error reading file: ${filePath}`, err);
+        console.error('Error reading file: %s', filePath, err);
         return null;
     }
 };
