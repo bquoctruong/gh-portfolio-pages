@@ -22,8 +22,14 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Scale Up Cloud Run Service
+      # - name: Scale Up Cloud Run Service
+      #   run: |
+      #     gcloud run services update ${{ vars.SERVICE }} \
+      #       --region=${{ vars.REGION }} \
+      #       --min-instances=1
+
+      - name: 'Scale Up Load Balancer'
         run: |
-          gcloud run services update ${{ vars.SERVICE }} \
-            --region=${{ vars.REGION }} \
-            --min-instances=1
+            gcloud compute backend-services update-backend-service ${{ vars.BACKEND_NAME }} \
+              --region=${{ vars.REGION }} \
+              --capacity-scaler=1.0

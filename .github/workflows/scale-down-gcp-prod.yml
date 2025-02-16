@@ -2,7 +2,7 @@ name: Scale Down Cloud Run Service
 on:
   schedule:
     # 5:00 PM PST = 01:00 UTC (next day)
-    - cron: '0 1 * * 1-5'
+    - cron: '0 1 * * *'
 
 jobs:
   scale-down:
@@ -22,8 +22,13 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Scale Down Cloud Run Service
+      # - name: Scale Down Cloud Run Service
+      #   run: |
+      #     gcloud run services update ${{ vars.SERVICE }} \
+      #       --region=${{ vars.REGION }} \
+      #       --min-instances=0
+      - name: 'Scale Down Load Balancer'
         run: |
-          gcloud run services update ${{ vars.SERVICE }} \
-            --region=${{ vars.REGION }} \
-            --min-instances=0
+            gcloud compute backend-services update-backend-service ${{ vars.BACKEND_NAME }} \
+              --region=${{ vars.REGION }} \
+              --capacity-scaler=0.0
