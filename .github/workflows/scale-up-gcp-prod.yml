@@ -30,6 +30,6 @@ jobs:
 
       - name: 'Scale Up Load Balancer'
         run: |
-            gcloud compute backend-services update-backend-service ${{ vars.BACKEND_NAME }} \
+            gcloud compute backend-services update ${{ vars.BACKEND_NAME }} \
               --region=${{ vars.REGION }} \
               --capacity-scaler=1.0
