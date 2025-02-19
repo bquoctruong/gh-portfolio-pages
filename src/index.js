@@ -4,7 +4,7 @@ const fs = require('fs');
 const httpProxy = require('http-proxy');
 
 // Constants
-const PORT = process.env.PORT || 80;
+const PORT = parseInt(process.env.PORT) || 80;
 const PUBLIC_DIR = path.join(__dirname, '../public');
 const proxy = httpProxy.createProxyServer();
 
@@ -96,8 +96,17 @@ const createServer = () => {
 // Start server function
 const startServer = (port = PORT) => {
     const server = createServer();
-    server.listen(port, () => {
-        console.log(`Server running at http://localhost:${port}/`);
+    // Add error handling for port binding
+    server.on('error', (error) => {
+        console.error('Server error:', error);
+        process.exit(1);  // Exit on error so Cloud Run can restart
+    });
+
+    server.listen(port, '0.0.0.0', () => {
+        console.log('Server starting with configuration:');
+        console.log(`- Port: ${port}`);
+        console.log(`- Environment PORT: ${process.env.PORT}`);
+        console.log(`- Process running as uid:`, process.getuid());
     });
     return server;
 };
