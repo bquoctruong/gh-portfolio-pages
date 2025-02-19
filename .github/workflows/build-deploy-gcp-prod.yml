@@ -11,8 +11,8 @@ on:
       - completed
 jobs:
   build:
-          #  || (github.event_name == 'pull_request'))
-          if: github.event.workflow_run.conclusion == 'success' && (github.event_name == 'push')
+          # github.event.workflow_run.conclusion == 'success' &&  || (github.event_name == 'pull_request'))
+          if: (github.event_name == 'push')
           runs-on: ubuntu-latest
           steps:
           - name: Checkout code
@@ -36,8 +36,8 @@ jobs:
     # Add 'id-token' with the intended permissions for workload identity federation
     needs: 
       [build]
-      #  || (github.event_name == 'pull_request'))
-    if: github.event.workflow_run.conclusion == 'success' && (github.event_name == 'push')
+      #   github.event.workflow_run.conclusion == 'success' && || (github.event_name == 'pull_request'))
+    if: (github.event_name == 'push')
     permissions:
       contents: 'read'
       id-token: 'write'
