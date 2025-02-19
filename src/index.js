@@ -15,6 +15,11 @@ const proxyMiddleware = createProxyMiddleware({
     target: 'https://cads-gcp-webui-645149004633.us-central1.run.app',
     changeOrigin: true,
     ws: true,
+    pathRewrite: { 
+        '^/deepseek': '',
+    '^/_app': '',
+    '^/static': '',
+    '^/favicon': '',},
     logLevel: 'debug'
 });
 
