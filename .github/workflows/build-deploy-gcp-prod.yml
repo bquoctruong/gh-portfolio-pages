@@ -1,8 +1,8 @@
 name: Build, Deploy to GCP Cloud Run
 on:
-  pull_request:
-    types: [closed]
-    branches: [main]
+  # pull_request:
+  #   types: [closed]
+  #   branches: [main]
   push:
     branches: [main]
   workflow_run:
