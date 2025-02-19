@@ -1,5 +1,5 @@
 # gh-portfolio-pages
-A static website hosted on a Caddy Docker image that displays my personal portfolio.
+A static website hosted on a NodeJS Docker image that displays my personal portfolio.
 
 # Overview
 This repository contains the code and configuration for my personal portfolio website. It's a static site served using Caddy within a Docker container, making deployment straightforward and efficient.
