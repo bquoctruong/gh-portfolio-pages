@@ -1,12 +1,22 @@
-const http = require('http');
-const path = require('path');
-const fs = require('fs');
-const httpProxy = require('http-proxy');
+import http from 'http';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // Constants
 const PORT = parseInt(process.env.PORT) || 80;
 const PUBLIC_DIR = path.join(__dirname, '../public');
-const proxy = httpProxy.createProxyServer();
+
+// Create proxy middleware
+const proxyMiddleware = createProxyMiddleware({
+    target: 'https://cads-gcp-webui-645149004633.us-central1.run.app',
+    changeOrigin: true,
+    logLevel: 'debug'
+});
+
 
 // Content type helper
 const getContentType = (filePath) => {
@@ -69,10 +79,7 @@ const handleRequest = async (req, res) => {
 
     // Proxy for DeepSeek server
     if (req.url.startsWith('/deepseek')) {
-        return proxy.web(req, res, {
-            target: `https://cads-gcp-webui-645149004633.us-central1.run.app`,
-            changeOrigin: true
-        });
+        return proxyMiddleware(req, res);
     }
 
     // Handle static files
@@ -112,14 +119,14 @@ const startServer = (port = PORT) => {
 };
 
 // Only start server if this file is run directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
     startServer();
 }
 
-module.exports = {
-    handleRequest,
-    createServer,
-    startServer,
-    getContentType,
-    getFileContent
-};
+// export = {
+//     handleRequest,
+//     createServer,
+//     startServer,
+//     getContentType,
+//     getFileContent
+// };
