@@ -1,10 +1,12 @@
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+const httpProxy = require('http-proxy');
 
 // Constants
 const PORT = process.env.PORT || 80;
 const PUBLIC_DIR = path.join(__dirname, '../public');
+const proxy = httpProxy.createProxyServer();
 
 // Content type helper
 const getContentType = (filePath) => {
@@ -63,6 +65,14 @@ const handleRequest = async (req, res) => {
             timestamp: Date.now()
         }));
         return;
+    }
+
+    // Proxy for DeepSeek server
+    if (req.url.startsWith('/deepseek')) {
+        return proxy.web(req, res, {
+            target: `https://cads-gcp-webui-645149004633.us-central1.run.app`,
+            changeOrigin: true
+        });
     }
 
     // Handle static files
