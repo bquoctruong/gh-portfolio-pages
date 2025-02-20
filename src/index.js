@@ -105,6 +105,7 @@ const shouldProxy = (url) => {
         '/static',
         '/assets',
         '/api',
+        ,'/ollama',
         '/favicon'
     ];
     
