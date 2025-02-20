@@ -26,6 +26,10 @@ const proxyMiddleware = createProxyMiddleware({
     target: TARGET_URL,
     changeOrigin: true,
     ws: true,
+    router: {
+        // Route specific paths to Ollama service
+        '/api/chat': 'https://cads-gcp-ollama-645149004633.us-central1.run.app'
+    },
     pathRewrite: function(path, req) {
         if (path.startsWith('/deepseek')) {
             return path.replace('/deepseek', '');
