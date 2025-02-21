@@ -21,39 +21,19 @@ const localFileExists = (filePath) => {
     }
 };
 
-// Proxy middleware with modified configuration
-const proxyMiddleware = createProxyMiddleware({
-    target: TARGET_URL,
+const webuiProxy = createProxyMiddleware({
+    target: 'https://cads-gcp-webui-645149004633.us-central1.run.app',
     changeOrigin: true,
     ws: true,
-    pathRewrite: function(path, req) {
-        if (path.startsWith('/deepseek')) {
-            return path.replace('/deepseek', '');
-        }
-        return path;
-    },
-    onProxyReq: (proxyReq, req, res) => {
-        console.log('Proxying:', req.method, req.url, '→', proxyReq.path);
-    },
-    onProxyRes: (proxyRes, req, res) => {
-        console.log('Proxy response:', req.url, proxyRes.statusCode);
-    },
-    onError: (err, req, res) => {
-        // If proxy fails, try serving local file as fallback
-        const filePath = req.url.replace(/^\//, '');
-        const fileContent = getFileContent(filePath);
-        
-        if (fileContent) {
-            res.writeHead(200, { 'Content-Type': getContentType(filePath) });
-            res.end(fileContent);
-        } else {
-            console.error('Proxy error:', err);
-            res.writeHead(500, {
-                'Content-Type': 'text/plain'
-            });
-            res.end('Server error: ' + err.message);
-        }
+    pathRewrite: {
+        '^/deepseek': '' // Remove /deepseek prefix
     }
+});
+
+const ollamaProxy = createProxyMiddleware({
+    target: 'https://cads-gcp-ollama-645149004633.us-central1.run.app',
+    changeOrigin: true,
+    ws: true
 });
 
 // Content type helper
@@ -114,33 +94,33 @@ const shouldProxy = (url) => {
     return proxyPaths.some(path => url.startsWith(path)) && !localFileExists(urlPath);
 };
 
-// Modified request handler
+/// Request handler
 const handleRequest = async (req, res) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
 
+    // Security headers
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    if (req.url === '/time') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-            utc_time: new Date().toISOString(),
-            timestamp: Date.now()
-        }));
-        return;
+    // Route based on URL path
+    if (req.url.startsWith('/api/chat')) {
+        return ollamaProxy(req, res);
     }
 
-    // Try to serve local file first
-    const filePath = req.url === '/' ? 'index.html' : req.url.replace(/^\//, '');
+    // Check for WebUI paths
+    const webuiPaths = ['/deepseek', '/_app', '/static', '/assets', '/favicon'];
+    if (webuiPaths.some(path => req.url.startsWith(path))) {
+        return webuiProxy(req, res);
+    }
+
+    // Handle local static files
+    let filePath = req.url === '/' ? 'index.html' : req.url.replace(/^\//, '');
     const fileContent = getFileContent(filePath);
 
     if (fileContent) {
         res.writeHead(200, { 'Content-Type': getContentType(filePath) });
         res.end(fileContent);
-    } else if (shouldProxy(req.url)) {
-        // If no local file exists and path should be proxied, forward to target
-        return proxyMiddleware(req, res);
     } else {
         res.writeHead(404);
         res.end('404 Not Found');
