@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PORT = parseInt(process.env.PORT) || 80;
 const PUBLIC_DIR = path.join(__dirname, '../public');
-const TARGET_URL = 'https://cads-gcp-webui-645149004633.us-central1.run.app';
+const TARGET_URL = 'https://cads-gcp-ollama-sc-webui-645149004633.us-central1.run.app';
 
 // Checks for local files; used to differentiate between proxy and local file serving
 const localFileExists = (filePath) => {
