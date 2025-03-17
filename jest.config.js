@@ -4,7 +4,8 @@ export default {
       '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   testEnvironment: 'node',
-  testMatch: ['**/tests/**/*.test.mjs'],
+  testMatch: ['**/tests/**/*.test.js'],
+  //testMatch: ['**/tests/**/*.test.mjs'],
   collectCoverage: true,
   coverageDirectory: 'coverage',
   clearMocks: true

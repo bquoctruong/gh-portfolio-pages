@@ -25,4 +25,4 @@ USER node
 EXPOSE 80 8080
 
 # Define the command to run your app
-CMD ["node", "src/index.js"]
+CMD ["node", "--require", "src/instrumentation.js", "src/index.js"]
