@@ -3,6 +3,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import { collectDefaultMetrics, register } from 'prom-client';
+
+collectDefaultMetrics();
 
 // Constants
 const __filename = fileURLToPath(import.meta.url);
@@ -127,7 +130,15 @@ const handleRequest = async (req, res) => {
         res.end(JSON.stringify({
             utc_time: new Date().toISOString(),
             timestamp: Date.now()
-        }));
+        }))};
+        //return;
+     if (req.url === '/metrics') {
+        try {
+            res.set('Content-Type', register.contentType);
+            res.end(await register.metrics());
+        } catch (err) {
+            res.status(500).end(err);
+        }};
         return;
     }
 
