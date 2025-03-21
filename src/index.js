@@ -130,18 +130,9 @@ const handleRequest = async (req, res) => {
         res.end(JSON.stringify({
             utc_time: new Date().toISOString(),
             timestamp: Date.now()
-        }))};
-        //return;
-     if (req.url === '/metrics') {
-        try {
-            res.set('Content-Type', register.contentType);
-            res.end(await register.metrics());
-        } catch (err) {
-            res.status(500).end(err);
-        }};
+        }));
         return;
     }
-
     // Try to serve local file first
     const filePath = req.url === '/' ? 'index.html' : req.url.replace(/^\//, '');
     const fileContent = getFileContent(filePath);
