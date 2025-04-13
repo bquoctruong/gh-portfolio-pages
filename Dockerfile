@@ -1,5 +1,9 @@
 # Use the official Node.js 18 image as base
-FROM node:18-alpine
+FROM node:18-alpine AS builder
+
+# Set default NODE_ENV value
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -8,21 +12,48 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci --only=production && npm cache clean --force
 
 # Bundle app source
 COPY . .
 
+# Remove unnecessary files
+RUN rm -rf tests/ .github/ .git/ .gitignore
+
+# Setup non-root user
 RUN chown -R node:node /usr/src/app
 
-# Modify system to allow node user to bind to privileged ports
-RUN apk add --no-cache libcap && \
-    setcap 'cap_net_bind_service=+ep' $(which node)
+# Security hardening
+FROM node:18-alpine
 
+# Set environment variables
+ENV NODE_ENV=production
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+
+# Copy from builder stage
+WORKDIR /usr/src/app
+COPY --from=builder --chown=node:node /usr/src/app /usr/src/app
+
+# Modify system to allow node user to bind to privileged ports
+RUN apk add --no-cache libcap dumb-init && \
+    setcap 'cap_net_bind_service=+ep' $(which node) && \
+    # Add security hardening packages
+    apk add --no-cache tini && \
+    # Remove unnecessary tools
+    rm -rf /tmp/* && \
+    # Set proper permissions
+    chmod -R 755 /usr/src/app && \
+    # Cleanup
+    apk cache clean || true
+
+# Switch to non-root user
 USER node
 
 # Expose the port the app runs on
 EXPOSE 80 8080
+
+# Use tini or dumb-init as entrypoint to handle signals properly
+ENTRYPOINT ["/sbin/tini", "--"]
 
 # Define the command to run your app
 CMD ["node", "--require", "./src/instrumentation.cjs", "src/index.js"]
