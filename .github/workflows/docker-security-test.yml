@@ -11,6 +11,8 @@ on:
 jobs:
   dockerfile-lint:
     runs-on: ubuntu-latest
+    # Skip this job if the pull request is being closed without merging
+    if: github.event_name != 'pull_request' || github.event.action != 'closed' || github.event.pull_request.merged == true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,6 +35,8 @@ jobs:
   docker-build-test:
     runs-on: ubuntu-latest
     needs: dockerfile-lint
+    # Skip this job if the pull request is being closed without merging
+    if: github.event_name != 'pull_request' || github.event.action != 'closed' || github.event.pull_request.merged == true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -81,6 +85,8 @@ jobs:
   container-structure-test:
     runs-on: ubuntu-latest
     needs: docker-build-test
+    # Skip this job if the pull request is being closed without merging
+    if: github.event_name != 'pull_request' || github.event.action != 'closed' || github.event.pull_request.merged == true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -129,6 +135,8 @@ jobs:
   zap-scan:
     runs-on: ubuntu-latest
     needs: container-structure-test
+    # Skip this job if the pull request is being closed without merging
+    if: github.event_name != 'pull_request' || github.event.action != 'closed' || github.event.pull_request.merged == true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
