@@ -9,10 +9,15 @@ on:
   #   workflows: [CodeQL]
   #   types:
   #     - completed
+  workflow_run:
+    workflows: [Docker Security Testing]
+    types:
+      - completed
+    branches: [main]
 jobs:
   build:
           # github.event.workflow_run.conclusion == 'success' &&  || (github.event_name == 'pull_request'))
-          if: (github.event_name == 'push')
+          if: (github.event_name == 'push' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'))
           runs-on: ubuntu-latest
           steps:
           - name: Checkout code

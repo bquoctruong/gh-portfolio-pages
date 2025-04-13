@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { collectDefaultMetrics, register } from 'prom-client';
+import { spawn } from 'node:child_process';
 
 collectDefaultMetrics();
 
@@ -13,7 +14,8 @@ const __dirname = path.dirname(__filename);
 const PORT = parseInt(process.env.PORT) || 80;
 const PUBLIC_DIR = path.join(__dirname, '../public');
 const TARGET_URL = 'https://cads-gcp-ollama-sc-webui-645149004633.us-central1.run.app';
-
+// Run python process
+//const { spawn } = require('node:child_process');
 // Checks for local files; used to differentiate between proxy and local file serving
 const localFileExists = (filePath) => {
     try {
@@ -131,6 +133,43 @@ const handleRequest = async (req, res) => {
             utc_time: new Date().toISOString(),
             timestamp: Date.now()
         }));
+        return;
+    }
+    if (req.url === '/python_get') {
+        const pythonScriptPath = path.join(__dirname, 'services', 'python_get.py');
+        console.log(`Executing Python script: ${pythonScriptPath}`);
+        
+        const pythonProcess = spawn('python', [pythonScriptPath]);
+        
+        let responseData = '';
+        let errorData = '';
+        
+        pythonProcess.stdout.on('data', (data) => {
+            responseData += data.toString();
+        });
+        
+        pythonProcess.stderr.on('data', (data) => {
+            errorData += data.toString();
+            console.error(`Python error: ${data.toString()}`);
+        });
+        
+        pythonProcess.on('close', (code) => {
+            if (code !== 0) {
+                console.error(`Python script exited with code ${code}`);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: errorData || 'Python script execution failed' }));
+            } else {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                try {
+                    // Try to parse and send as JSON
+                    const jsonData = JSON.parse(responseData);
+                    res.end(JSON.stringify(jsonData));
+                } catch (e) {
+                    // If parsing fails, send raw output
+                    res.end(JSON.stringify({ data: responseData }));
+                }
+            }
+        });
         return;
     }
     // Try to serve local file first
