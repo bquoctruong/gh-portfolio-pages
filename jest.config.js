@@ -4,14 +4,12 @@ export default {
       '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   testEnvironment: 'node',
-  //testMatch: ['**/tests/**/*.test.js'],
-  testMatch: ['**/tests/**/*.test.mjs'],
+  testMatch: ['**/tests/**/*.test.js'],
   collectCoverage: true,
   coverageDirectory: 'coverage',
   clearMocks: true,
   resetMocks: false,
   restoreMocks: false,
   injectGlobals: true,
-  extensionsToTreatAsEsm: ['.mjs'],
   setupFilesAfterEnv: ['./tests/setup.mjs']
 };
