@@ -9,6 +9,9 @@ globalThis.setupMocks = () => {
   process.env.NODE_ENV = 'test';
 };
 
+// Support for CommonJS tests
+global.jest = jest;
+
 // Clean up after each test
 afterEach(() => {
   jest.clearAllMocks();
