@@ -25,6 +25,8 @@ jobs:
       run: npm test
       env:
         NODE_OPTIONS: --experimental-vm-modules
+        NODE_ENV: test
+        CI: true
     - name: Upload coverage
       uses: actions/upload-artifact@v4
       with:
