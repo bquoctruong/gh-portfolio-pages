@@ -8,5 +8,10 @@ export default {
   testMatch: ['**/tests/**/*.test.mjs'],
   collectCoverage: true,
   coverageDirectory: 'coverage',
-  clearMocks: true
+  clearMocks: true,
+  resetMocks: false,
+  restoreMocks: false,
+  injectGlobals: true,
+  extensionsToTreatAsEsm: ['.mjs'],
+  setupFilesAfterEnv: ['./tests/setup.mjs']
 };

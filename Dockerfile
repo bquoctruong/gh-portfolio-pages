@@ -29,6 +29,9 @@ FROM node:18-alpine
 # Set environment variables
 ENV NODE_ENV=production
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+# For GCP Cloud Run, use PORT env var which defaults to 80
+# PORT will be automatically set by Cloud Run
+ENV HOST=0.0.0.0
 
 # Copy from builder stage
 WORKDIR /usr/src/app
@@ -49,11 +52,13 @@ RUN apk add --no-cache libcap dumb-init && \
 # Switch to non-root user
 USER node
 
-# Expose the port the app runs on
+# Expose port 80 as primary port, 8080 as secondary
+# GCP Cloud Run will use the PORT environment variable (typically 8080)
 EXPOSE 80 8080
 
 # Use tini or dumb-init as entrypoint to handle signals properly
 ENTRYPOINT ["/sbin/tini", "--"]
 
-# Define the command to run your app
-CMD ["node", "--require", "./src/instrumentation.cjs", "src/index.js"]
+# Define the command to run your app with explicit port setting
+# Using PORT environment variable which will be provided by Cloud Run
+CMD ["sh", "-c", "echo 'Starting server on port ${PORT:-80}' && node --require ./src/instrumentation.cjs src/index.js"]
