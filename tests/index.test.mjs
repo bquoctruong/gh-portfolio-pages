@@ -1,24 +1,24 @@
 import { jest } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import * as fs from 'fs';
 import { handler, getContentType } from '../src/index.mjs';
+
+// Setup ES module mocking
+const mockFs = {
+  existsSync: jest.fn(),
+  readFileSync: jest.fn(),
+  readdirSync: jest.fn(() => ['assets', 'index.html', 'posts', 'projects'])
+};
+
+// Mock the fs module
+jest.unstable_mockModule('fs', () => mockFs);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Setup proper mocking for fs module
-jest.mock('fs', () => ({
-  existsSync: jest.fn(),
-  readFileSync: jest.fn(),
-  readdirSync: jest.fn().mockReturnValue(['assets', 'index.html', 'posts', 'projects'])
-}));
-
 describe('Static File Server', () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        // Default mocks for environment variables
-        process.env.LAMBDA_TASK_ROOT = undefined;
     });
 
     test('serves index.html for root path', async () => {
@@ -26,8 +26,8 @@ describe('Static File Server', () => {
         const mockContent = '<html>Test</html>';
         
         // Setup mocks
-        fs.existsSync.mockReturnValue(true);
-        fs.readFileSync.mockReturnValue(Buffer.from(mockContent));
+        mockFs.existsSync.mockReturnValue(true);
+        mockFs.readFileSync.mockReturnValue(Buffer.from(mockContent));
 
         const response = await handler(event);
         
@@ -40,7 +40,7 @@ describe('Static File Server', () => {
         const event = { rawPath: '/not-found.txt' };
         
         // Setup mock to return false for file existence
-        fs.existsSync.mockReturnValue(false);
+        mockFs.existsSync.mockReturnValue(false);
 
         const response = await handler(event);
         
@@ -58,8 +58,8 @@ describe('Static File Server', () => {
             const event = { rawPath: '/fonts/test.woff2' };
             
             // Setup mock to return true for file existence and mock file content
-            fs.existsSync.mockReturnValue(true);
-            fs.readFileSync.mockReturnValue(Buffer.from('mock font data'));
+            mockFs.existsSync.mockReturnValue(true);
+            mockFs.readFileSync.mockReturnValue(Buffer.from('mock font data'));
             
             const response = await handler(event);
             expect(response.headers['Content-Type']).toBe('font/woff2');
