@@ -110,7 +110,7 @@ const shouldProxy = (url) => {
         '/static',
         '/assets',
         '/api',
-        ,'/ollama',
+        '/ollama',
         '/favicon'
     ];
     
@@ -214,3 +214,14 @@ const startServer = (port = PORT) => {
 if (import.meta.url === `file://${process.argv[1]}`) {
     startServer();
 }
+
+// Export functions for testing or import
+export {
+    getContentType,
+    handleRequest,
+    shouldProxy,
+    localFileExists,
+    getFileContent,
+    createServer,
+    startServer
+};
