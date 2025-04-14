@@ -2,9 +2,15 @@ name: Build, Deploy to GCP Cloud Run
 on:
   push:
     branches: [main]
+    paths:
+      - 'public/**'
+      - 'src/**'
   pull_request:
     types: [closed]
     branches: [main]
+    paths:
+      - 'public/**'
+      - 'src/**'
   workflow_run:
     workflows: [Docker Security Testing, CodeQL]
     types:
