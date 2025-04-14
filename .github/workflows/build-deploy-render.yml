@@ -5,28 +5,29 @@ on:
     workflows: [CodeQL]
     types:
       - completed
+
 jobs:
   build:
-        if: github.event.workflow_run.conclusion == 'success'
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    if: github.event.workflow_run.conclusion == 'success' && (contains(github.event.workflow_run.head_commit.modified, 'public/') || contains(github.event.workflow_run.head_commit.modified, 'src/'))
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-        - name: Build Docker image
-          run: |
-            docker build -t ${{ vars.SERVICE }}:${{ github.sha }} ./
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ vars.SERVICE }}:${{ github.sha }} ./
 
-        - name: Save Docker image to tar file
-          run: |
-            docker save ${{ vars.SERVICE }}:${{ github.sha }} -o ${{ vars.SERVICE }}_${{ github.sha }}.tar
+    - name: Save Docker image to tar file
+      run: |
+        docker save ${{ vars.SERVICE }}:${{ github.sha }} -o ${{ vars.SERVICE }}_${{ github.sha }}.tar
 
-        - name: Upload image artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: ${{ vars.SERVICE }}_${{ github.sha }}
-            path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
-            retention-days: 1
+    - name: Upload image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ vars.SERVICE }}_${{ github.sha }}
+        path: ${{ vars.SERVICE }}_${{ github.sha }}.tar
+        retention-days: 1
   deploy-render:
     runs-on: ubuntu-latest
     steps:

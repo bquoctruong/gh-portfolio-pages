@@ -1,11 +1,21 @@
 name: Build, Deploy to AWS Lambda
 on:
   push:
-    branches: ['*', '*/*', '**','!main']
+    branches-ignore: [main]
+    paths:
+      - 'public/**'
+      - 'src/**'
+  pull_request:
+    types: [closed]
+    branches-ignore: [main]
+    paths:
+      - 'public/**'
+      - 'src/**'
   workflow_run:
-    workflows: [CodeQL]
+    workflows: [Docker Security Testing, CodeQL]
     types:
       - completed
+    branches-ignore: [main]
 jobs:
   build:
     if: github.event.workflow_run.conclusion == 'success'
