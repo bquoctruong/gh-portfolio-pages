@@ -1,5 +1,5 @@
-# Use the official Node.js 18 image as base
-FROM node:18-alpine AS builder
+# Use the official Node.js 20 image as base
+FROM node:20-alpine AS builder
 
 # Set default NODE_ENV value
 ARG NODE_ENV=production
@@ -24,7 +24,7 @@ RUN rm -rf tests/ .github/ .git/ .gitignore
 RUN chown -R node:node /usr/src/app
 
 # Security hardening
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Set environment variables
 ENV NODE_ENV=production
