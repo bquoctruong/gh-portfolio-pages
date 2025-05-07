@@ -61,4 +61,4 @@ ENTRYPOINT ["/sbin/tini", "--"]
 
 # Define the command to run your app with explicit port setting
 # Using PORT environment variable which will be provided by Cloud Run
-CMD ["sh", "-c", "echo 'Starting server on port ${PORT:-80}' && node --require ./src/instrumentation.cjs src/index.js"]
+CMD ["sh", "-c", "echo 'Starting server on port ${PORT:-80}' && node --require ./src/instrumentation.js src/index.js"]
