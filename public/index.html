@@ -20,6 +20,9 @@
 				DevOps Engineer, or whichever term the industry wants to move onto</p>
 		</header>
 		<nav id="nav">
+			<ul id="sidebar-posts">
+				<!-- Dynamic markdown posts will be inserted here -->
+			</ul>
 			<ul>
 				<li><a href="#about" class="active">About</a></li>
 				<li><a href="#skills">Skills</a></li>
@@ -46,6 +49,8 @@
 
 		<!-- Main -->
 		<div id="main">
+			<!-- Main content will be loaded here -->
+			<section id="dynamic-md-content" style="display:none;"></section>
 
 			<!-- About -->
 			<section id="about">
@@ -183,6 +188,43 @@
 	<script src="assets/js/breakpoints.min.js"></script>
 	<script src="assets/js/util.js"></script>
 	<script src="assets/js/main.js"></script>
+	<script>
+		// Dynamically load markdown posts in sidebar
+		fetch('/posts/list').then(r => r.json()).then(posts => {
+			const sidebar = document.getElementById('sidebar-posts');
+			posts.forEach(post => {
+				const li = document.createElement('li');
+				const a = document.createElement('a');
+				a.textContent = post.replace(/^posts\//, '').replace(/\.md$/, '').replace(/\//g, ' / ');
+				a.href = '#md-' + encodeURIComponent(post);
+				li.appendChild(a);
+				sidebar.appendChild(li);
+			});
+		});
+
+		// Handle navigation and load markdown
+		function loadMarkdown(postPath) {
+			fetch('/posts/render/' + postPath).then(r => r.text()).then(html => {
+				document.getElementById('dynamic-md-content').style.display = '';
+				document.getElementById('dynamic-md-content').innerHTML = html;
+				window.scrollTo(0, 0);
+			});
+		}
+		window.addEventListener('hashchange', () => {
+			const hash = location.hash;
+			if (hash.startsWith('#md-')) {
+				const postPath = decodeURIComponent(hash.slice(4));
+				loadMarkdown(postPath);
+			} else {
+				document.getElementById('dynamic-md-content').style.display = 'none';
+			}
+		});
+		// On page load, check hash
+		if (location.hash.startsWith('#md-')) {
+			const postPath = decodeURIComponent(location.hash.slice(4));
+			loadMarkdown(postPath);
+		}
+	</script>
 
 </body>
 

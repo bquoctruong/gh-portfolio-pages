@@ -5,6 +5,7 @@ import fs from 'fs';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { collectDefaultMetrics, register } from 'prom-client';
 import { spawn } from 'node:child_process';
+import { marked } from 'marked';
 
 collectDefaultMetrics();
 
@@ -119,6 +120,24 @@ const shouldProxy = (url) => {
     return proxyPaths.some(path => url.startsWith(path)) && !localFileExists(urlPath);
 };
 
+// Helper to recursively find markdown files in posts directory
+function findMarkdownPosts(dir = path.join(PUBLIC_DIR, 'posts')) {
+    const posts = [];
+    function walk(currentDir, relPath = '') {
+        for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
+            const entryPath = path.join(currentDir, entry.name);
+            const entryRel = path.join(relPath, entry.name);
+            if (entry.isDirectory()) {
+                walk(entryPath, entryRel);
+            } else if (entry.isFile() && entry.name.endsWith('.md')) {
+                posts.push(entryRel.replace(/\\/g, '/'));
+            }
+        }
+    }
+    walk(dir);
+    return posts;
+}
+
 // Modified request handler
 const handleRequest = async (req, res) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
@@ -170,6 +189,29 @@ const handleRequest = async (req, res) => {
                 }
             }
         });
+        return;
+    }
+    // Endpoint to get list of markdown posts
+    if (req.url === '/posts/list') {
+        const posts = findMarkdownPosts();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(posts));
+        return;
+    }
+
+    // Endpoint to render markdown as HTML
+    if (req.url.startsWith('/posts/render/')) {
+        const mdPath = req.url.replace('/posts/render/', 'posts/');
+        const absPath = path.join(PUBLIC_DIR, mdPath);
+        if (!absPath.startsWith(path.join(PUBLIC_DIR, 'posts')) || !fs.existsSync(absPath)) {
+            res.writeHead(404);
+            res.end('Not Found');
+            return;
+        }
+        const mdContent = fs.readFileSync(absPath, 'utf8');
+        const html = marked(mdContent);
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(html);
         return;
     }
     // Try to serve local file first

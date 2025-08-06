@@ -30,3 +30,5 @@ gha-creds-*.json
 coverage/
 
 node_modules/
+
+.env
