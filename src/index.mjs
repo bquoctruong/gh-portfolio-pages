@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'url';
+import { marked } from 'marked';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,28 +28,15 @@ const getContentType = (filePath) => {
         case '.woff': return 'font/woff';
         case '.woff2': return 'font/woff2';
         case '.ttf': return 'font/ttf';
+        case '.md': return 'text/html';
         default: return 'application/octet-stream';
     }
 };
 
-// Debug logging
-console.log('Environment:', {
-    LAMBDA_TASK_ROOT: process.env.LAMBDA_TASK_ROOT,
-    PUBLIC_DIR,
-    __dirname,
-    files: fs.readdirSync(process.env.LAMBDA_TASK_ROOT || PUBLIC_DIR)
-});
-
 const getFileContent = (filePath) => {
     try {
-        const sanitizedPath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+        const sanitizedPath = path.normalize(filePath).replace(/^(\.\.[\\/])+/, '');
         const resolvedPath = path.join(PUBLIC_DIR, sanitizedPath);
-        
-        console.log('File request:', {
-            requested: filePath,
-            resolved: resolvedPath,
-            exists: fs.existsSync(resolvedPath)
-        });
         
         if (!resolvedPath.startsWith(PUBLIC_DIR)) {
             console.error('Path traversal attempt:', filePath);
@@ -62,15 +50,44 @@ const getFileContent = (filePath) => {
     }
 };
 
-export const handler = async (event) => {
-    console.log('Event:', JSON.stringify(event));
-    
-    try {
-        const path = event.path || event.rawPath || '/';
-        console.log('Requested path:', path);
+const getMarkdownPosts = (dir, filelist = []) => {
+    const files = fs.readdirSync(dir);
+    files.forEach(file => {
+        const filepath = path.join(dir, file);
+        if (fs.statSync(filepath).isDirectory()) {
+            getMarkdownPosts(filepath, filelist);
+        } else if (path.extname(file) === '.md') {
+            filelist.push(path.relative(PUBLIC_DIR, filepath).replace(/\\/g, '/'));
+        }
+    });
+    return filelist;
+};
 
-        // Handle time endpoint
-        if (path === '/time') {
+export const handler = async (event) => {
+
+        if (requestPath === '/posts/list') {
+            const posts = getMarkdownPosts(path.join(PUBLIC_DIR, 'posts'));
+            return {
+                statusCode: 200,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(posts)
+            };
+        }
+
+        if (requestPath.startsWith('/posts/render/')) {
+            const postPath = requestPath.substring('/posts/render/'.length);
+            const markdownContent = getFileContent(postPath);
+            if (markdownContent) {
+                const html = marked(markdownContent.toString('utf-8'));
+                return {
+                    statusCode: 200,
+                    headers: { 'Content-Type': 'text/html' },
+                    body: html
+                };
+            }
+        }
+
+        if (requestPath === '/time') {
             return {
                 statusCode: 200,
                 headers: {
@@ -84,8 +101,7 @@ export const handler = async (event) => {
             };
         }
 
-        // Handle static files
-        const filePath = path === '/' ? 'index.html' : path.replace(/^\//, '');
+        const filePath = requestPath === '/' ? 'index.html' : requestPath.replace(/^\//, '');
         const fileContent = getFileContent(filePath);
 
         if (!fileContent) {
