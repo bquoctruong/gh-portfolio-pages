@@ -1,3 +1,6 @@
+// Load OpenTelemetry instrumentation
+import './instrumentation.cjs';
+
 import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -134,6 +137,14 @@ const handleRequest = async (req, res) => {
             timestamp: Date.now()
         }));
         return;
+    }
+    if (req.url === '/metrics') {
+        try {
+            res.set('Content-Type', register.contentType);
+            res.end(await register.metrics());
+          } catch (err) {
+            res.status(500).end(err);
+          }
     }
     if (req.url === '/python_get') {
         const pythonScriptPath = path.join(__dirname, 'services', 'python_get.py');
