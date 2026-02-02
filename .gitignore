@@ -32,5 +32,12 @@ coverage/
 node_modules/
 
 CLAUDE.md
+PLAN.md
 
 .claude/
+
+# Hugo
+.hugo_build.lock
+resources/_gen/
+
+docs/
