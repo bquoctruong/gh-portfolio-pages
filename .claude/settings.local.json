@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(cd /mnt/h/Users/BQT/Documents/VS\\\\ Code/gh-portfolio-pages && git checkout main:*)"
+    ]
+  }
+}
