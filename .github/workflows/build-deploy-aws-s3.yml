@@ -34,27 +34,27 @@ jobs:
 
       - name: Sync non-HTML/CSS/JS files
         run: |
-          aws s3 sync public/ s3://bqt-portfolio --delete \
+          aws s3 sync public/ s3://bqtruong.com --delete \
             --exclude "*.html" --exclude "*.css" --exclude "*.js" \
             --cache-control "max-age=3600"
 
       - name: Sync HTML files
         run: |
-          aws s3 sync public/ s3://bqt-portfolio \
+          aws s3 sync public/ s3://bqtruong.com \
             --exclude "*" --include "*.html" \
             --content-type "text/html" \
             --cache-control "max-age=300"
 
       - name: Sync CSS files
         run: |
-          aws s3 sync public/ s3://bqt-portfolio \
+          aws s3 sync public/ s3://bqtruong.com \
             --exclude "*" --include "*.css" \
             --content-type "text/css" \
             --cache-control "max-age=86400"
 
       - name: Sync JS files
         run: |
-          aws s3 sync public/ s3://bqt-portfolio \
+          aws s3 sync public/ s3://bqtruong.com \
             --exclude "*" --include "*.js" \
             --content-type "application/javascript" \
             --cache-control "max-age=86400"
@@ -62,8 +62,8 @@ jobs:
       - name: Verify deployment
         run: |
           echo "Verifying key files exist in S3..."
-          aws s3 ls s3://bqt-portfolio/index.html
-          aws s3 ls s3://bqt-portfolio/404.html
-          aws s3 ls s3://bqt-portfolio/assets/css/main.css
-          aws s3 ls s3://bqt-portfolio/assets/js/main.js
+          aws s3 ls s3://bqtruong.com/index.html
+          aws s3 ls s3://bqtruong.com/404.html
+          aws s3 ls s3://bqtruong.com/assets/css/main.css
+          aws s3 ls s3://bqtruong.com/assets/js/main.js
           echo "Verification complete."
