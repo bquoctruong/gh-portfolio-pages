@@ -1,0 +1,14 @@
+{{ define "main" }}
+<section id="about">
+    <div class="image main" data-position="center">
+        <img src="{{ "assets/images/banner1.jpg" | relURL }}" alt="" />
+    </div>
+    <div class="container">
+        <header class="major">
+            <h2>{{ .Title }}</h2>
+            <p>{{ .Date.Format "January 2, 2006" }}</p>
+        </header>
+        {{ .Content }}
+    </div>
+</section>
+{{ end }}

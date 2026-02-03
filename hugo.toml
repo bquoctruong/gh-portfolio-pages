@@ -1,0 +1,4 @@
+baseURL = 'https://bqtruong.com/'
+languageCode = 'en-us'
+title = 'Brian Truong'
+theme = 'portfolio'

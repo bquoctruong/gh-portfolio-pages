@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<title>{{ .Title }}</title>
+	<link rel="icon" type="image/x-icon" href="{{ "assets/images/favicon.ico" | relURL }}">
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" href="{{ "assets/css/main.css" | relURL }}" />
+</head>
+
+<body class="is-preload">
+
+	<!-- Header -->
+	<section id="header">
+		<header>
+			<span class="image avatar"><img src="{{ "assets/images/avatar0.jpg" | relURL }}" alt="" /></span>
+			<h1 id="logo"><a href="#">{{ .Site.Title }}</a></h1>
+			<p>Site Reliability Engineer<br />
+				DevOps Engineer, or whichever term the industry wants to move onto</p>
+		</header>
+		<nav id="nav">
+			<ul>
+				<li><a href="/" class="active">About</a></li>
+				<li><a href="/#skills">Skills</a></li>
+				<li><a href="/#accomplishments">Accomplishments</a></li>
+				{{ range .Site.Menus.main }}
+				<li><a href="{{ .URL }}">{{ .Name }}</a></li>
+				{{ end }}
+			</ul>
+		</nav>
+		<footer>
+			<ul class="icons">
+				<li><a href="https://github.com/bquoctruong/" target="_blank" rel="noopener noreferrer"
+						class="icon brands fa-github"><span class="label"></span></a></li>
+				<li><a href="https://www.linkedin.com/in/brian-truong-956260204/" target="_blank"
+						rel="noopener noreferrer" class="fab fa-linkedin-in"><span class="label"></span></a></li>
+			</ul>
+		</footer>
+	</section>
+
+	<!-- Wrapper -->
+	<div id="wrapper">
+
+		<!-- Main -->
+		<div id="main">
+			{{ block "main" . }}{{ end }}
+		</div>
+
+		<!-- Footer -->
+		<section id="footer">
+			<div class="container">
+				<ul class="copyright">
+					<li>&copy; B.T. All rights reserved.</li>
+					<li><a href="http://html5up.net">Design</a></li>
+				</ul>
+			</div>
+		</section>
+
+	</div>
+
+	<!-- Scripts -->
+	<script src="{{ "assets/js/jquery.min.js" | relURL }}"></script>
+	<script src="{{ "assets/js/jquery.scrollex.min.js" | relURL }}"></script>
+	<script src="{{ "assets/js/jquery.scrolly.min.js" | relURL }}"></script>
+	<script src="{{ "assets/js/browser.min.js" | relURL }}"></script>
+	<script src="{{ "assets/js/breakpoints.min.js" | relURL }}"></script>
+	<script src="{{ "assets/js/util.js" | relURL }}"></script>
+	<script src="{{ "assets/js/main.js" | relURL }}"></script>
+
+</body>
+
+</html>

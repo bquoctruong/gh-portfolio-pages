@@ -39,5 +39,6 @@ PLAN.md
 # Hugo
 .hugo_build.lock
 resources/_gen/
+public/
 
 docs/
