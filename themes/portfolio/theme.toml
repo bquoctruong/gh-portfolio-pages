@@ -1,0 +1,18 @@
+name = 'Portfolio'
+license = 'MIT'
+licenselink = 'https://github.com/bquoctruong/gh-portfolio-pages/blob/main/themes/portfolio/LICENSE'
+description = 'Personal portfolio theme based on Read Only by HTML5 UP'
+
+homepage = 'https://github.com/bquoctruong/gh-portfolio-pages'
+
+tags = ['blog', 'portfolio']
+features = ['responsive', 'blog']
+
+[author]
+  name = 'Brian Truong'
+  homepage = 'https://bqtruong.com'
+
+[original]
+  author = 'HTML5 UP'
+  homepage = 'https://html5up.net'
+  repo = 'https://html5up.net/read-only'
